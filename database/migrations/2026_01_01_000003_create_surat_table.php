@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('keterangan')->nullable();
             $table->date('tanggal_surat');
             $table->string('berkas_pdf')->nullable();
-            $table->timestamps();
+            $table->timestamps(); 
 
             $table->unique(['jenis_surat_id', 'tahun', 'nomor_urut']);
         });
