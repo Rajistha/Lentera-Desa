@@ -1,0 +1,95 @@
+# Dependensi dan hasil build
+/vendor/
+/node_modules/
+/public/build
+/public/hot
+/public/storage
+
+# Konfigurasi dan rahasia lokal
+.env
+.env.backup
+.env.production
+auth.json
+/storage/*.key
+
+# Cache dan log
+.phpunit.result.cache
+.phpunit.cache/
+/storage/pail
+npm-debug.log
+yarn-error.log
+*.log
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/framework/testing/*
+!/storage/framework/testing/.gitkeep
+/storage/debugbar
+/bootstrap/cache/*.php
+/database/*.sqlite
+/database/*.sqlite-journal
+
+# Editor / IDE
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+
+# Sistem operasi
+.DS_Store
+Thumbs.db
+
+# Dokumen perencanaan disimpan lokal; hanya README.md yang dipublikasikan
+*.md
+!README.md
+/docs/*
+!/docs/img/
+
+# Skrip bantu pribadi dan konfigurasi alat bantu pengembangan (bukan bagian aplikasi)
+setup-git.sh
+/.claude/
+/.cursor/
+/.windsurf/
+/.codex/
+/.continue/
+/.cline/
+/.roo/
+/.kilocode/
+/.trae/
+/.junie/
+/.amazonq/
+/.codeium/
+/.supermaven/
+/.gemini/
+/.copilot/
+/.aider*
+/.ai/
+/.prompts/
+.mcp.json
+.cursorrules
+.cursorignore
+.windsurfrules
+.clinerules
+.roomodes
+.github/copilot-instructions.md
+*.prompt.md
+
+# Berkas buatan aplikasi saat dipakai (bukan kode)
+/storage/app/templat/*
+/storage/app/surat/*
+!/storage/app/templat/.gitkeep
+!/storage/app/surat/.gitkeep
+
+# Cadangan basis data
+*.sql
+*.sql.gz
+!database/*.sql
+
+# Folder cache harus tetap ada setelah clone
+!/bootstrap/cache/.gitkeep
