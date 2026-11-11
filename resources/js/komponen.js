@@ -36,7 +36,10 @@ function el(tag, kelas = '', teks = null, atribut = {}) {
 
 /** Satu komponen terbuka pada satu waktu. */
 function pasangPenutup(root, tutup) {
-    document.addEventListener('click', (e) => { if (!root.contains(e.target)) tutup(); });
+    // Pakai jalur peristiwa (dicatat saat klik terjadi), bukan e.target: kalender menggambar ulang isinya
+    // saat berpindah bulan, sehingga tombol yang diklik sudah lepas dari halaman ketika peristiwa sampai
+    // ke sini dan root.contains(e.target) keliru menganggapnya klik di luar.
+    document.addEventListener('click', (e) => { if (!e.composedPath().includes(root)) tutup(); });
     document.addEventListener('komponen-buka', (e) => { if (e.detail !== root) tutup(); });
 }
 
@@ -425,12 +428,66 @@ function toast(el) {
     }
 }
 
+/* ---------- Animasi memuat saat formulir yang memakan waktu dikirim ---------- */
+
+function memuat() {
+    const lapisan = document.getElementById('overlay-memuat');
+    if (!lapisan) return;
+
+    const teks = lapisan.querySelector('[data-memuat-teks]');
+    let pengaman;
+
+    const pulihkan = () => {
+        clearTimeout(pengaman);
+        lapisan.hidden = true;
+        document.querySelectorAll('form[data-memuat]').forEach((form) => {
+            delete form.dataset.sedangKirim;
+            form.querySelectorAll('[type="submit"]').forEach((b) => {
+                b.disabled = false;
+                b.classList.remove('cursor-wait', 'opacity-70');
+            });
+        });
+    };
+
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement) || !form.dataset.memuat || e.defaultPrevented) return;
+        // Formulir yang masih menunggu konfirmasi belum benar-benar dikirim.
+        if (form.dataset.konfirmasi && !form.dataset.terkonfirmasi) return;
+
+        // Cegah kirim ganda (klik dua kali akan membuat dua surat bernomor).
+        if (form.dataset.sedangKirim) {
+            e.preventDefault();
+            return;
+        }
+        form.dataset.sedangKirim = '1';
+
+        teks.textContent = form.dataset.memuat;
+        lapisan.hidden = false;
+
+        // Dimatikan setelah peristiwa selesai agar formulir tetap terkirim.
+        setTimeout(() => {
+            form.querySelectorAll('[type="submit"]').forEach((b) => {
+                b.disabled = true;
+                b.classList.add('cursor-wait', 'opacity-70');
+            });
+        }, 0);
+
+        // Jaring pengaman bila jaringan putus: lapisan tidak boleh menutupi halaman selamanya.
+        pengaman = setTimeout(pulihkan, 90000);
+    });
+
+    // Kembali lewat tombol "back" peramban memulihkan halaman dari cache; lapisan harus hilang.
+    window.addEventListener('pageshow', (e) => { if (e.persisted) pulihkan(); });
+}
+
 function mulai() {
     document.querySelectorAll('[data-pilihan]').forEach(pilihan);
     document.querySelectorAll('[data-kalender]').forEach(kalender);
     document.querySelectorAll('[data-toggle-sandi]').forEach(tombolSandi);
     document.querySelectorAll('[data-toast]').forEach(toast);
     modalKonfirmasi();
+    memuat();
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mulai);

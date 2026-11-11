@@ -140,6 +140,39 @@ class TampilanTest extends TestCase
         }
     }
 
+    /* ---------- animasi memuat pada aksi yang memakan waktu ---------- */
+
+    public function test_lapisan_memuat_tersedia_di_halaman_aplikasi_dan_tersembunyi_di_awal(): void
+    {
+        $this->actingAs($this->operator())->get('/dasbor')->assertOk()
+            ->assertSee('id="overlay-memuat"', false)
+            ->assertSee('animate-spin', false)
+            ->assertSee('data-memuat-teks', false);
+
+        $this->assertMatchesRegularExpression('/<div id="overlay-memuat" hidden /', $this->actingAs($this->operator())->get('/dasbor')->getContent());
+    }
+
+    public function test_aksi_yang_membuat_pdf_atau_mengimpor_memakai_animasi_memuat(): void
+    {
+        $operator = $this->operator();
+        $surat = $this->surat();
+
+        $this->actingAs($operator)->get('/surat/buat')->assertSee('data-memuat="Membuat surat dan PDF..."', false);
+        $this->actingAs($operator)->get("/surat/{$surat->id}/ubah")->assertSee('data-memuat="Menyimpan perubahan dan membuat ulang PDF..."', false);
+        $this->actingAs($operator)->get("/surat/{$surat->id}")->assertSee('data-memuat="Membuat ulang PDF..."', false);
+        $this->actingAs($operator)->get('/warga/impor')->assertSee('data-memuat="Mengimpor data warga..."', false);
+    }
+
+    public function test_tombol_hapus_tidak_memakai_animasi_memuat_karena_cepat_dan_memakai_konfirmasi(): void
+    {
+        $surat = $this->surat();
+
+        $isi = $this->actingAs($this->operator())->get("/surat/{$surat->id}")->getContent();
+
+        $this->assertStringNotContainsString('data-memuat="Menghapus', $isi);
+        $this->assertStringContainsString('data-konfirmasi-judul="Hapus surat?"', $isi);
+    }
+
     /* ---------- toast status ---------- */
 
     public function test_toast_sukses_tampil_setelah_surat_dibuat(): void

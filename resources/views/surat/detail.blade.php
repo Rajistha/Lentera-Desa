@@ -71,7 +71,7 @@
             Ubah
         </a>
 
-        <form action="{{ route('surat.buat-ulang-pdf', $surat) }}" method="post">
+        <form action="{{ route('surat.buat-ulang-pdf', $surat) }}" method="post" data-memuat="Membuat ulang PDF...">
             @csrf
             <button type="submit"
                     @class(['flex h-9 items-center gap-2 rounded-full px-5 text-[13px] font-medium',

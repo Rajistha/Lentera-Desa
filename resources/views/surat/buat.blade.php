@@ -17,6 +17,7 @@
                    :subjudul="$ubah ? 'No. '.$surat->nomor_surat.' · nomor dan jenis surat tidak berubah' : 'Pilih warga dan jenis surat; data warga terisi otomatis'">
     <div class="flex items-start gap-5">
         <form action="{{ $ubah ? route('surat.update', $surat) : route('surat.store') }}" method="post" novalidate
+              data-memuat="{{ $ubah ? 'Menyimpan perubahan dan membuat ulang PDF...' : 'Membuat surat dan PDF...' }}"
               class="w-full max-w-[732px] rounded-[18px] border border-line bg-card p-6">
             @csrf
             @if ($ubah) @method('put') @endif

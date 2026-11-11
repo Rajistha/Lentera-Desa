@@ -46,7 +46,7 @@
     @endif
 
     <div class="flex items-start gap-5">
-        <form action="{{ route('warga.impor.proses') }}" method="post" enctype="multipart/form-data" novalidate
+        <form action="{{ route('warga.impor.proses') }}" method="post" enctype="multipart/form-data" novalidate data-memuat="Mengimpor data warga..."
               class="w-full max-w-[792px] rounded-[18px] border border-line bg-card p-6">
             @csrf
 

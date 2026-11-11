@@ -26,5 +26,6 @@
     </div>
 
     <x-toast />
+    <x-overlay-memuat />
     <x-modal-konfirmasi />
 </x-layout-dasar>
