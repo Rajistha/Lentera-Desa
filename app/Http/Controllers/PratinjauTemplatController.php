@@ -8,6 +8,7 @@ use App\Services\PdfGagal;
 use App\Services\TemplatRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -83,25 +84,35 @@ class PratinjauTemplatController extends Controller
                 ->with('galat', 'Pratinjau sudah kedaluwarsa. Buka kembali dari formulir.');
         }
 
-        $docx = $renderer->isi($info['jalur'], $renderer->dataContoh($info['kode']));
-        try {
-            $html = $renderer->keHtml($docx);
-        } finally {
-            File::deleteDirectory(dirname($docx));
-        }
+        // Dengan LibreOffice, pratinjau adalah PDF asli (persis hasil akhir). Tanpa itu, tampilan HTML
+        // perkiraan; bila pembaca HTML juga gagal, teks biasa. Halaman tidak boleh galat karena isi berkas.
+        $bisaPdf = $renderer->libreOfficeTersedia();
+        $html = $teks = null;
 
-        // Satu halaman A4 (794 x 1123 px pada 96 dpi) dengan margin 2,54 cm.
-        $kertas = '<style>html{background:#fff}body{box-sizing:border-box;width:794px;min-height:1123px;margin:0;padding:96px}</style>';
+        if (! $bisaPdf) {
+            $docx = $renderer->isi($info['jalur'], $renderer->dataContoh($info['kode']));
+            try {
+                $html = $renderer->keHtml($docx);
+                $teks = $html === null ? $renderer->keTeks($docx) : null;
+            } finally {
+                File::deleteDirectory(dirname($docx));
+            }
+
+            // Satu halaman A4 (794 x 1123 px pada 96 dpi) dengan margin 2,54 cm.
+            $kertas = '<style>html{background:#fff}body{box-sizing:border-box;width:794px;min-height:1123px;margin:0;padding:96px}</style>';
+            $html = $html === null ? null : str_replace('</head>', $kertas.'</head>', $html);
+        }
 
         return view('jenis-surat.pratinjau', [
             'token' => $token,
             'info' => $info,
-            'html' => str_replace('</head>', $kertas.'</head>', $html),
-            'bisaPdf' => $renderer->libreOfficeTersedia(),
+            'html' => $html,
+            'teks' => $teks,
+            'bisaPdf' => $bisaPdf,
         ]);
     }
 
-    public function pdf(string $token, TemplatRenderer $renderer): BinaryFileResponse|RedirectResponse
+    public function pdf(Request $request, string $token, TemplatRenderer $renderer): BinaryFileResponse|RedirectResponse|Response
     {
         $info = $this->baca($token);
         if (! $info) {
@@ -117,6 +128,13 @@ class PratinjauTemplatController extends Controller
             $kirim = tempnam(sys_get_temp_dir(), 'pratinjau-');
             File::move($pdf, $kirim);
         } catch (PdfGagal $e) {
+            // Dimuat di dalam bingkai halaman pratinjau: tampilkan pesan singkat, bukan mengalihkan
+            // sehingga seluruh halaman tertanam di dalam bingkai.
+            if ($request->boolean('sematan')) {
+                return response('<!doctype html><meta charset="utf-8"><body style="font:13px sans-serif;color:#2b3445;padding:24px">'
+                    .'<p><strong>PDF contoh belum dapat dibuat.</strong></p><p>'.e($e->getMessage()).'</p></body>');
+            }
+
             return redirect()->route('jenis-surat.pratinjau.tampil', $token)->with('galat', $e->getMessage());
         } finally {
             File::deleteDirectory(dirname($docx));

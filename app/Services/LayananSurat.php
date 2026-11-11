@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\JenisSurat;
+use App\Models\ProfilDesa;
 use App\Models\Surat;
 use App\Models\User;
 use App\Models\Warga;
@@ -162,9 +163,7 @@ class LayananSurat
             'status_perkawinan' => Warga::STATUS_PERKAWINAN[$warga->status_perkawinan] ?? '',
             'keperluan' => $surat->keperluan,
             'keterangan' => $surat->keterangan ?? '',
-            'nama_desa' => config('lentera.desa.nama'),
-            'nama_kepala_desa' => config('lentera.desa.kepala'),
-        ];
+        ] + ProfilDesa::saatIni()->untukTemplat();
     }
 
     private function susunNomor(int $urut, string $kode, Carbon $tanggal): string
@@ -173,7 +172,7 @@ class LayananSurat
             '%03d/%s/%s/%s/%d',
             $urut,
             $kode,
-            config('lentera.desa.kode'),
+            ProfilDesa::saatIni()->kode_desa,
             $this->renderer->romawi($tanggal->month),
             $tanggal->year,
         );

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ProfilDesa;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -9,11 +10,12 @@ use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
+use ZipArchive;
 
 class TemplatRenderer
 {
     /**
-     * Salin templat dan isi penanda ${...}. Penanda yang tidak dikenal
+     * Salin templat dan isi penanda ${...} atau {{ ... }}. Penanda yang tidak dikenal
      * dikosongkan (AB-06). Nilai diperlakukan sebagai teks, bukan kode.
      *
      * @param  array<string, string|null>  $data  nama penanda => nilai
@@ -30,7 +32,72 @@ class TemplatRenderer
         $hasil = $this->folderSementara().DIRECTORY_SEPARATOR.'surat.docx';
         $proses->saveAs($hasil);
 
+        // Putaran kedua untuk templat bergaya {{ nama }} (dan {{nama}}), yang lazim pada templat buatan sendiri.
+        ProsesorTemplat::denganKurawalGanda(function () use ($hasil, $data) {
+            $kedua = new ProsesorTemplat($hasil);
+            foreach ($kedua->getVariables() as $nama) {
+                $kedua->setValue($nama, $this->escape((string) ($data[trim($nama)] ?? '')));
+            }
+            $kedua->saveAs($hasil);
+        });
+
+        $this->isiLabelBerkurung($hasil, $data);
+
         return $hasil;
+    }
+
+    /** Label berkurung yang lazim pada templat buatan sendiri => penanda yang mengisinya. */
+    private const LABEL_BERKURUNG = [
+        'nama desa' => 'nama_desa',
+        'nama kecamatan' => 'nama_kecamatan',
+        'nama kabupaten' => 'nama_kabupaten',
+        'alamat kantor desa' => 'alamat_kantor_desa',
+        'kode pos' => 'kode_pos',
+        'xxxxx' => 'kode_pos',
+        'nomor telepon' => 'telepon_desa',
+        'telepon' => 'telepon_desa',
+        'nama kepala desa' => 'nama_kepala_desa',
+        'nama terang kepala desa' => 'nama_kepala_desa',
+    ];
+
+    /**
+     * Templat buatan sendiri sering memakai label seperti [NAMA DESA] atau [Nomor Telepon] sebagai
+     * isian. Label itu diganti dengan data profil desa bila datanya sudah diisi administrator; bila
+     * belum, label dibiarkan agar terlihat bahwa profil desa perlu dilengkapi.
+     */
+    private function isiLabelBerkurung(string $docx, array $data): void
+    {
+        $zip = new ZipArchive;
+        if ($zip->open($docx) !== true) {
+            return;
+        }
+
+        $bagian = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $nama = $zip->getNameIndex($i);
+            if (preg_match('#^word/(document|header\d*|footer\d*)\.xml$#', $nama)) {
+                $bagian[] = $nama;
+            }
+        }
+
+        foreach ($bagian as $nama) {
+            $xml = $zip->getFromName($nama);
+            $baru = preg_replace_callback('#(<w:t(?:\s[^>]*)?>)([^<]*)(</w:t>)#', function (array $simpul) use ($data) {
+                $isi = preg_replace_callback('/\[\s*([^\[\]]{1,40}?)\s*\]/u', function (array $label) use ($data) {
+                    $kunci = self::LABEL_BERKURUNG[mb_strtolower(trim($label[1]))] ?? null;
+                    $nilai = $kunci ? trim((string) ($data[$kunci] ?? '')) : '';
+
+                    return $nilai === '' ? $label[0] : $this->escape($nilai);
+                }, $simpul[2]);
+
+                return $simpul[1].$isi.$simpul[3];
+            }, $xml);
+
+            if ($baru !== null && $baru !== $xml) {
+                $zip->addFromString($nama, $baru);
+            }
+        }
+        $zip->close();
     }
 
     /** Ubah .docx ke PDF dengan LibreOffice; kembalikan jalur PDF di folder yang sama. */
@@ -92,10 +159,72 @@ class TemplatRenderer
         }
     }
 
-    /** Tampilan HTML dokumen (tanpa LibreOffice) untuk pratinjau. */
-    public function keHtml(string $docx): string
+    /**
+     * Tampilan HTML dokumen untuk pratinjau cadangan (bila LibreOffice tidak ada). $docx harus
+     * salinan sementara karena berkasnya diperbaiki di tempat. Mengembalikan null bila pembaca
+     * PhpWord tidak sanggup membacanya: berkas hasil simpan Word/LibreOffice kerap memuat bagian
+     * yang tidak dikenalnya, dan itu tidak boleh membuat halaman pratinjau galat.
+     */
+    public function keHtml(string $docx): ?string
     {
-        return IOFactory::createWriter(IOFactory::load($docx), 'HTML')->getContent();
+        try {
+            $this->rapikanGayaBawaan($docx);
+
+            $html = IOFactory::createWriter(IOFactory::load($docx), 'HTML')->getContent();
+
+            // Berkas yang tak lengkap tidak melempar galat; PhpWord hanya menghasilkan halaman kosong.
+            preg_match('#<body[^>]*>(.*)</body>#si', $html, $badan);
+            if (preg_replace('/[\s\x{00A0}]+/u', '', html_entity_decode(strip_tags($badan[1] ?? ''), ENT_QUOTES, 'UTF-8')) === '') {
+                return null;
+            }
+
+            return $html;
+        } catch (\Throwable $e) {
+            Log::warning('Pratinjau HTML dari PhpWord gagal', ['galat' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    /** Teks polos isi dokumen (satu paragraf per baris): cadangan terakhir pratinjau. */
+    public function keTeks(string $docx): string
+    {
+        $zip = new ZipArchive;
+        if ($zip->open($docx) !== true) {
+            return '';
+        }
+        $xml = (string) $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        $xml = preg_replace(['/<w:tab\s*\/>/', '/<w:br[^>]*\/>|<\/w:p>|<\/w:tr>/'], [' ', "\n"], $xml);
+        $teks = html_entity_decode(strip_tags($xml), ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+        return trim(preg_replace("/\n{3,}/", "\n\n", $teks));
+    }
+
+    /**
+     * Word dan LibreOffice menyimpan <w:rPrDefault/> dan <w:pPrDefault/> kosong; pembaca PhpWord
+     * lalu mencoba membaca gaya yang tidak ada dan melempar TypeError. Beri isi kosong yang sah.
+     */
+    private function rapikanGayaBawaan(string $docx): void
+    {
+        $zip = new ZipArchive;
+        if ($zip->open($docx) !== true) {
+            return;
+        }
+
+        $gaya = $zip->getFromName('word/styles.xml');
+        if ($gaya !== false) {
+            $baru = preg_replace(
+                ['#<w:rPrDefault\s*/>#', '#<w:pPrDefault\s*/>#'],
+                ['<w:rPrDefault><w:rPr/></w:rPrDefault>', '<w:pPrDefault><w:pPr/></w:pPrDefault>'],
+                $gaya
+            );
+            if ($baru !== null && $baru !== $gaya) {
+                $zip->addFromString('word/styles.xml', $baru);
+            }
+        }
+        $zip->close();
     }
 
     public function libreOfficeTersedia(): bool
@@ -107,9 +236,10 @@ class TemplatRenderer
     public function dataContoh(string $kode): array
     {
         $tanggal = Carbon::now()->locale('id');
+        $desa = ProfilDesa::saatIni();
 
         return [
-            'nomor_surat' => '012/'.$kode.'/'.config('lentera.desa.kode').'/'.$this->romawi($tanggal->month).'/'.$tanggal->year,
+            'nomor_surat' => '012/'.$kode.'/'.$desa->kode_desa.'/'.$this->romawi($tanggal->month).'/'.$tanggal->year,
             'tanggal_surat' => $tanggal->translatedFormat('j F Y'),
             'nik' => '3573010101900001',
             'nama' => 'Budi Santoso',
@@ -123,9 +253,7 @@ class TemplatRenderer
             'status_perkawinan' => 'Kawin',
             'keperluan' => 'Persyaratan kerja',
             'keterangan' => 'Contoh keterangan tambahan.',
-            'nama_desa' => config('lentera.desa.nama'),
-            'nama_kepala_desa' => config('lentera.desa.kepala'),
-        ];
+        ] + $desa->untukTemplat();
     }
 
     public function romawi(int $bulan): string
@@ -180,8 +308,9 @@ class TemplatRenderer
     /** Nilai masuk ke XML Word: escape, dan baris baru jadi pemisah baris Word. */
     private function escape(string $nilai): string
     {
-        // "$" jadi &#36; agar nilai tidak terbaca sebagai penanda oleh penggantian berikutnya.
-        $aman = str_replace('$', '&#36;', htmlspecialchars($nilai, ENT_QUOTES | ENT_XML1, 'UTF-8'));
+        // "$", "{", "}", "[", dan "]" jadi entitas agar nilai tidak terbaca sebagai penanda oleh penggantian berikutnya
+        // (tampilannya di Word tetap sama).
+        $aman = str_replace(['$', '{', '}', '[', ']'], ['&#36;', '&#123;', '&#125;', '&#91;', '&#93;'], htmlspecialchars($nilai, ENT_QUOTES | ENT_XML1, 'UTF-8'));
 
         return preg_replace('/\R/u', '</w:t><w:br/><w:t xml:space="preserve">', $aman);
     }

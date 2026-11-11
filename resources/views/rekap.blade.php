@@ -7,7 +7,7 @@
 <x-layout-aplikasi judul="Rekap Layanan" subjudul="Jumlah surat per jenis">
     {{-- Kop khusus cetak --}}
     <div class="mb-4 hidden text-center print:block">
-        <p class="text-base font-bold uppercase">Pemerintah Desa {{ config('lentera.desa.nama') }}</p>
+        <p class="text-base font-bold uppercase">Pemerintah Desa {{ \App\Models\ProfilDesa::saatIni()->nama_desa }}</p>
         <p class="text-sm">Rekap Layanan Surat — {{ $periode }}</p>
         <p class="text-xs text-muted">Dicetak {{ now()->locale('id')->translatedFormat('j F Y') }}</p>
     </div>

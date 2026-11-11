@@ -5,6 +5,7 @@
         ? [
             ['Kelola Jenis Surat', 'jenis-surat.index', 'berkas', 'jenis-surat*'],
             ['Kelola Pengguna', 'pengguna.index', 'pengguna', 'pengguna*'],
+            ['Profil Desa', 'profil-desa.index', 'desa', 'profil-desa*'],
         ]
         : [
             ['Dasbor', 'dasbor', 'dasbor', 'dasbor'],

@@ -21,6 +21,11 @@ class Penanda
         'keperluan' => 'Keperluan',
         'keterangan' => 'Keterangan tambahan',
         'nama_desa' => 'Nama desa',
+        'nama_kecamatan' => 'Nama kecamatan',
+        'nama_kabupaten' => 'Nama kabupaten',
+        'alamat_kantor_desa' => 'Alamat kantor desa',
+        'kode_pos' => 'Kode pos',
+        'telepon_desa' => 'Telepon kantor desa',
         'nama_kepala_desa' => 'Nama kepala desa',
     ];
 }

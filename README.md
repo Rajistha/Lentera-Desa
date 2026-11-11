@@ -60,6 +60,7 @@ Tangkapan layar: simpan berkas PNG berukuran seragam di docs/img/, lalu hapus ta
 | Kelola jenis surat | Tambah, ubah, dan hapus jenis surat beserta templat Word (`.docx`, maksimal 2 MB). Jenis yang sudah dipakai tidak dapat dihapus.     |
 | Pratinjau templat  | Lihat hasil templat dengan data contoh sebelum disimpan, termasuk daftar penanda (`${nama}`, `${nik}`, dan seterusnya).              |
 | Kelola pengguna    | Tambah, ubah, dan hapus akun operator atau administrator. Administrator tidak dapat menghapus atau menurunkan peran akunnya sendiri. |
+| Profil desa        | Atur nama desa, kecamatan, kabupaten, alamat kantor, kode pos, telepon, nama kepala desa, dan kode desa untuk nomor surat. Datanya mengisi kop dan isi surat secara otomatis. |
 
 ## Cara Kerja
 
@@ -111,7 +112,7 @@ Buka `.env` dan sesuaikan bagian berikut:
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Basis data (buat basis data `lentera_desa` dengan _collation_ `utf8mb4_unicode_ci` terlebih dahulu) |
 | `LIBREOFFICE_PATH`                          | Jalur `soffice.exe`, misalnya `C:\Program Files\LibreOffice\program\soffice.exe`                    |
-| `DESA_NAMA`, `DESA_KEPALA`, `DESA_KODE`     | Nama desa, nama kepala desa, dan kode desa pada nomor surat                                         |
+| `DESA_NAMA`, `DESA_KEPALA`, `DESA_KODE`     | Nilai awal profil desa; setelah aplikasi berjalan, atur lewat menu **Profil Desa** (bukan `.env`)   |
 | `SEED_PASSWORD`                             | Kata sandi awal akun bawaan (opsional; lihat bagian Akun Awal)                                      |
 
 ```bash
@@ -143,11 +144,17 @@ Lalu buka `http://<alamat-ip-komputer-server>:8000` dari komputer lain. Izinkan 
 
 ## Templat Surat
 
-Templat adalah berkas Word biasa dengan penanda berbentuk `${nama}`. Penanda yang dikenal:
+Templat adalah berkas Word biasa dengan penanda berbentuk `${nama}` atau `{{ nama }}`; keduanya dikenali dan boleh dicampur dalam satu templat. Data surat dan warga:
 
-`${nomor_surat}` `${tanggal_surat}` `${nik}` `${nama}` `${tempat_lahir}` `${tanggal_lahir}` `${jenis_kelamin}` `${alamat}` `${rt}` `${rw}` `${pekerjaan}` `${status_perkawinan}` `${keperluan}` `${keterangan}` `${nama_desa}` `${nama_kepala_desa}`
+`nomor_surat` `tanggal_surat` `nik` `nama` `tempat_lahir` `tanggal_lahir` `jenis_kelamin` `alamat` `rt` `rw` `pekerjaan` `status_perkawinan` `keperluan` `keterangan`
 
-Ketik tiap penanda sekaligus tanpa mengubah format di tengahnya. Penanda yang tidak dikenal dikosongkan. Gunakan **Pratinjau** pada halaman Kelola Jenis Surat untuk memeriksa hasilnya sebelum menyimpan.
+Data desa (dari menu **Profil Desa**):
+
+`nama_desa` `nama_kecamatan` `nama_kabupaten` `alamat_kantor_desa` `kode_pos` `telepon_desa` `nama_kepala_desa`
+
+Label berkurung yang lazim pada templat buatan sendiri, yaitu `[NAMA DESA]`, `[NAMA KECAMATAN]`, `[NAMA KABUPATEN]`, `[Alamat Kantor Desa]`, `[xxxxx]` (kode pos), `[Nomor Telepon]`, dan `[Nama Terang Kepala Desa]`, juga diisi otomatis bila datanya sudah ada di Profil Desa; bila belum, labelnya dibiarkan sehingga terlihat perlu dilengkapi.
+
+Ketik tiap penanda sekaligus tanpa mengubah format di tengahnya. Penanda yang tidak dikenal dikosongkan (misalnya `{{ agama }}` bila datanya belum ada di aplikasi). Dengan LibreOffice terpasang, **Pratinjau** menampilkan PDF asli; tanpa itu, tampilan perkiraan. Gunakan **Pratinjau** pada halaman Kelola Jenis Surat untuk memeriksa hasilnya sebelum menyimpan.
 
 ## Pengujian
 
@@ -194,5 +201,6 @@ Lalu ekstrak `berkas_YYYYMMDD_HHMMSS.zip` ke `storage/app`.
 | "Proses konversi LibreOffice berhenti dengan galat" | Lihat `storage/logs/laravel.log` (memuat kode keluar dan perintah yang dijalankan). Pastikan LibreOffice tidak sedang terbuka dengan jendela dialog dan folder `storage/framework` dapat ditulis. |
 | Halaman tampil tanpa gaya                           | Jalankan `npm run build`.                                                                                                                                                                         |
 | Galat basis data saat membuka halaman               | Pastikan MySQL menyala dan `DB_*` di `.env` benar, lalu `php artisan migrate`.                                                                                                                    |
+| Galat 500 setelah memperbarui kode                  | Jalankan `php artisan migrate` agar tabel baru terbuat, lalu `php artisan db:seed --class=ProfilDesaSeeder` bila profil desa belum ada.                                                            |
 
 <!-- Tambahkan nama dan NIM penulis di sini. -->

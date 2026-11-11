@@ -6,6 +6,7 @@ use App\Http\Controllers\ImporWargaController;
 use App\Http\Controllers\JenisSuratController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\PratinjauTemplatController;
+use App\Http\Controllers\ProfilDesaController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\WargaController;
@@ -58,5 +59,7 @@ Route::middleware('auth')->group(function () {
             ->except(['show', 'create'])
             ->parameters(['jenis-surat' => 'jenisSurat']);
         Route::resource('pengguna', PenggunaController::class)->except(['show', 'create']);
+        Route::get('/profil-desa', [ProfilDesaController::class, 'index'])->name('profil-desa.index');
+        Route::put('/profil-desa', [ProfilDesaController::class, 'update'])->name('profil-desa.update');
     });
 });

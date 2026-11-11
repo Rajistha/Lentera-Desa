@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\TemplateProcessor;
 use Tests\Concerns\SiapkanData;
 use Tests\TestCase;
 use ZipArchive;
@@ -138,6 +139,83 @@ class TemplatRendererTest extends TestCase
         putenv('APP_KEY');
         putenv('DB_PASSWORD');
         putenv('VARIABEL_UJI_LO');
+    }
+
+    /* ---------- penanda gaya {{ nama }} ---------- */
+
+    public function test_penanda_gaya_kurawal_ganda_dan_gaya_dolar_terisi_bersamaan(): void
+    {
+        $templat = $this->templatTeks('A: {{ nama }} | B: {{nik}} | C: ${tempat_lahir} | D: {{ nomor_surat }}');
+        $teks = $this->teks($this->isi($templat, ['nama' => 'Budi', 'nik' => '3573', 'tempat_lahir' => 'Malang', 'nomor_surat' => '001/SKD']));
+
+        $this->assertStringContainsString('A: Budi | B: 3573 | C: Malang | D: 001/SKD', $teks);
+        $this->assertStringNotContainsString('{{', $teks);
+        $this->assertStringNotContainsString('${', $teks);
+    }
+
+    public function test_penanda_kurawal_ganda_yang_tidak_dikenal_dikosongkan(): void
+    {
+        // "agama" dan "kewarganegaraan" ada di templat buatan sendiri tetapi belum ada datanya di aplikasi.
+        $teks = $this->teks($this->isi($this->templatTeks('Agama: {{ agama }}.', 'Nama: {{ nama }}'), ['nama' => 'Budi']));
+
+        $this->assertStringContainsString('Agama: .', $teks);
+        $this->assertStringContainsString('Nama: Budi', $teks);
+    }
+
+    public function test_nilai_berisi_penanda_tidak_diisi_ulang_pada_putaran_kedua(): void
+    {
+        $xml = $this->isi($this->templatTeks('Nama: ${nama}', 'NIK: {{ nik }}'), ['nama' => 'X {{ nik }} ${nik}', 'nik' => '3573010101900001']);
+
+        $this->assertSame(1, substr_count($this->teks($xml), '3573010101900001'), 'NIK hanya muncul di barisnya sendiri');
+        $this->assertStringContainsString('X {{ nik }} ${nik}', $this->teks($xml), 'isi nilai tampil apa adanya');
+        $this->assertNotFalse(@simplexml_load_string($xml));
+    }
+
+    public function test_karakter_penanda_dipulihkan_setelah_dipakai(): void
+    {
+        $this->isi($this->templatTeks('{{ nama }}'), ['nama' => 'Budi']);
+
+        $proses = new \ReflectionClass(TemplateProcessor::class);
+        $this->assertSame('${', $proses->getStaticPropertyValue('macroOpeningChars'));
+        $this->assertSame('}', $proses->getStaticPropertyValue('macroClosingChars'));
+        $this->assertStringContainsString('Budi', $this->teks($this->isi($this->templatTeks('${nama}'), ['nama' => 'Budi'])));
+    }
+
+    /* ---------- pratinjau tahan terhadap berkas hasil simpan Word/LibreOffice ---------- */
+
+    /** Salinan templat seeder dengan <w:rPrDefault/> dan <w:pPrDefault/> kosong, seperti hasil simpan Word/LibreOffice. */
+    private function docxGayaKosong(): string
+    {
+        $jalur = tempnam(sys_get_temp_dir(), 'kosong').'.docx';
+        copy(Storage::disk('local')->path('templat/skd.docx'), $jalur);
+        $zip = new ZipArchive;
+        $zip->open($jalur);
+        $gaya = preg_replace('#<w:docDefaults>.*?</w:docDefaults>#s', '<w:docDefaults><w:rPrDefault/><w:pPrDefault/></w:docDefaults>', $zip->getFromName('word/styles.xml'));
+        $zip->addFromString('word/styles.xml', $gaya);
+        $zip->close();
+
+        return $jalur;
+    }
+
+    public function test_html_pratinjau_tidak_galat_pada_gaya_bawaan_kosong(): void
+    {
+        $docx = $this->renderer->isi($this->docxGayaKosong(), $this->renderer->dataContoh('SKD'));
+        $html = $this->renderer->keHtml($docx);
+        File::deleteDirectory(dirname($docx));
+
+        $this->assertIsString($html, 'sebelum perbaikan: TypeError array_key_exists() di PhpWord Styles.php');
+        $this->assertStringContainsString('Budi Santoso', $html);
+    }
+
+    public function test_berkas_yang_tak_terbaca_pembaca_html_jatuh_ke_teks_biasa_tanpa_galat(): void
+    {
+        $rusak = $this->berkasZip(['word/document.xml' => '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Halo dunia</w:t></w:r></w:p></w:body></w:document>']);
+        $jalur = sys_get_temp_dir().DIRECTORY_SEPARATOR.'rusak-'.bin2hex(random_bytes(4)).'.docx';
+        copy($rusak->getRealPath(), $jalur);
+
+        $this->assertNull($this->renderer->keHtml($jalur), 'pembaca PhpWord tidak sanggup: kembali null, bukan melempar');
+        $this->assertStringContainsString('Halo dunia', $this->renderer->keTeks($jalur));
+        File::delete($jalur);
     }
 
     public function test_html_pratinjau_dibuat_tanpa_libreoffice(): void

@@ -13,4 +13,8 @@
        @class([$tab, 'bg-blue text-white' => $aktif === 'pengguna', 'bg-surf hover:bg-line' => $aktif !== 'pengguna'])>
         <x-ikon nama="pengguna" :ukuran="16" />Pengguna
     </a>
+    <a href="{{ route('profil-desa.index') }}" @if ($aktif === 'profil-desa') aria-current="page" @endif
+       @class([$tab, 'bg-blue text-white' => $aktif === 'profil-desa', 'bg-surf hover:bg-line' => $aktif !== 'profil-desa'])>
+        <x-ikon nama="desa" :ukuran="16" />Profil Desa
+    </a>
 </nav>
