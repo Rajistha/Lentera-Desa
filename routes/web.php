@@ -5,6 +5,7 @@ use App\Http\Controllers\HalamanController;
 use App\Http\Controllers\ImporWargaController;
 use App\Http\Controllers\JenisSuratController;
 use App\Http\Controllers\PratinjauTemplatController;
+use App\Http\Controllers\SuratController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/warga/impor/templat', [ImporWargaController::class, 'templat'])->name('warga.impor.templat');
         Route::post('/warga/impor', [ImporWargaController::class, 'proses'])->name('warga.impor.proses');
         Route::resource('warga', WargaController::class)->except('show');
+
+        Route::get('/surat/buat', [SuratController::class, 'create'])->name('surat.create');
+        Route::get('/surat/cari-warga', [SuratController::class, 'cariWarga'])->name('surat.cari-warga');
+        Route::post('/surat', [SuratController::class, 'store'])->name('surat.store');
+        Route::get('/surat/{surat}', [SuratController::class, 'show'])->name('surat.show');
     });
 
     Route::middleware('peran:administrator')->group(function () {

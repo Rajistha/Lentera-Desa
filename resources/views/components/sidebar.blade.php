@@ -9,8 +9,8 @@
         : [
             ['Dasbor', 'dasbor', 'dasbor', 'dasbor'],
             ['Data Warga', 'warga.index', 'warga', 'warga*'],
-            ['Buat Surat', 'dasbor', 'surat-baru', 'surat/buat'],
-            ['Arsip Surat', 'dasbor', 'arsip', 'surat'],
+            ['Buat Surat', 'surat.create', 'surat-baru', 'surat/buat'],
+            ['Arsip Surat', 'dasbor', 'arsip', fn () => request()->is('surat') || (request()->is('surat/*') && ! request()->is('surat/buat'))],
             ['Rekap Layanan', 'dasbor', 'rekap', 'rekap*'],
         ];
 
@@ -25,7 +25,7 @@
 
     <nav class="flex flex-col gap-1" aria-label="Menu utama">
         @foreach ($menu as [$teks, $rute, $ikon, $pola])
-            @php $aktif = request()->is($pola); @endphp
+            @php $aktif = $pola instanceof Closure ? $pola() : request()->is($pola); @endphp
             <a href="{{ route($rute) }}"
                @class(['flex h-[42px] items-center gap-3 rounded-xl px-3.5 text-sm',
                        'bg-hl font-bold text-blue' => $aktif,

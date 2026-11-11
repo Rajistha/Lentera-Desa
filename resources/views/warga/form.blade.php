@@ -28,26 +28,15 @@
                 </x-kolom>
 
                 <x-kolom nama="tanggal_lahir" label="Tanggal lahir">
-                    <input id="tanggal_lahir" name="tanggal_lahir" type="date" max="{{ now()->toDateString() }}"
-                           value="{{ old('tanggal_lahir', $warga->tanggal_lahir?->toDateString()) }}" class="{{ $input('tanggal_lahir') }}">
+                    <x-tanggal nama="tanggal_lahir" :nilai="$warga->tanggal_lahir?->toDateString()" :maks="now()->toDateString()" placeholder="Pilih tanggal lahir" />
                 </x-kolom>
 
                 <x-kolom nama="jenis_kelamin" label="Jenis kelamin">
-                    <select id="jenis_kelamin" name="jenis_kelamin" class="{{ $input('jenis_kelamin') }}">
-                        <option value="">Pilih jenis kelamin</option>
-                        @foreach (\App\Models\Warga::JENIS_KELAMIN as $nilai => $teks)
-                            <option value="{{ $nilai }}" @selected(old('jenis_kelamin', $warga->jenis_kelamin) === $nilai)>{{ $teks }}</option>
-                        @endforeach
-                    </select>
+                    <x-pilihan nama="jenis_kelamin" :opsi="\App\Models\Warga::JENIS_KELAMIN" :nilai="$warga->jenis_kelamin" placeholder="Pilih jenis kelamin" />
                 </x-kolom>
 
                 <x-kolom nama="status_perkawinan" label="Status perkawinan">
-                    <select id="status_perkawinan" name="status_perkawinan" class="{{ $input('status_perkawinan') }}">
-                        <option value="">Pilih status</option>
-                        @foreach (\App\Models\Warga::STATUS_PERKAWINAN as $nilai => $teks)
-                            <option value="{{ $nilai }}" @selected(old('status_perkawinan', $warga->status_perkawinan) === $nilai)>{{ $teks }}</option>
-                        @endforeach
-                    </select>
+                    <x-pilihan nama="status_perkawinan" :opsi="\App\Models\Warga::STATUS_PERKAWINAN" :nilai="$warga->status_perkawinan" placeholder="Pilih status" />
                 </x-kolom>
 
                 <x-kolom nama="alamat" label="Alamat" class="col-span-2">
