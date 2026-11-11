@@ -8,11 +8,16 @@
             <x-topbar />
 
             <main class="flex-1 px-8 py-7">
-                <div class="mb-5 border-b border-line pb-4">
-                    <h1 class="text-[26px] font-bold leading-tight text-blue">{{ $judul }}</h1>
-                    @if ($subjudul)
-                        <p class="mt-1 text-[13px] text-muted">{{ $subjudul }}</p>
-                    @endif
+                <div class="mb-5 flex items-start justify-between gap-4 border-b border-line pb-4">
+                    <div>
+                        <h1 class="text-[26px] font-bold leading-tight text-blue">{{ $judul }}</h1>
+                        @if ($subjudul)
+                            <p class="mt-1 text-[13px] text-muted">{{ $subjudul }}</p>
+                        @endif
+                    </div>
+                    @isset($aksi)
+                        <div class="shrink-0 pt-1">{{ $aksi }}</div>
+                    @endisset
                 </div>
 
                 @if (session('sukses'))

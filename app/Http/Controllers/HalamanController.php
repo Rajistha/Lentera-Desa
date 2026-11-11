@@ -18,14 +18,6 @@ class HalamanController extends Controller
         ]);
     }
 
-    public function jenisSurat(): View
-    {
-        return view('halaman-sementara', [
-            'judul' => 'Kelola Jenis Surat',
-            'subjudul' => 'Halaman ini dikerjakan pada langkah 4',
-        ]);
-    }
-
     public function pengguna(): View
     {
         return view('halaman-sementara', [

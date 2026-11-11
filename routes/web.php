@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HalamanController;
 use App\Http\Controllers\ImporWargaController;
+use App\Http\Controllers\JenisSuratController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +28,9 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('peran:administrator')->group(function () {
-        Route::get('/jenis-surat', [HalamanController::class, 'jenisSurat'])->name('jenis-surat.index');
+        Route::resource('jenis-surat', JenisSuratController::class)
+            ->except(['show', 'create'])
+            ->parameters(['jenis-surat' => 'jenisSurat']);
         Route::get('/pengguna', [HalamanController::class, 'pengguna'])->name('pengguna.index');
     });
 });
