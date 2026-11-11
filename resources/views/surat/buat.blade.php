@@ -1,4 +1,5 @@
 @php
+    $ubah = $surat->exists;
     $input = fn ($nama) => 'h-[38px] w-full rounded-full bg-surf px-4 text-[13px] outline-none placeholder:text-muted'
         .($errors->has($nama) ? ' ring-1 ring-error' : '');
     $baris = [
@@ -12,11 +13,13 @@
     ];
 @endphp
 
-<x-layout-aplikasi judul="Buat Surat" subjudul="Pilih warga dan jenis surat; data warga terisi otomatis">
+<x-layout-aplikasi :judul="$ubah ? 'Ubah Surat' : 'Buat Surat'"
+                   :subjudul="$ubah ? 'No. '.$surat->nomor_surat.' · nomor dan jenis surat tidak berubah' : 'Pilih warga dan jenis surat; data warga terisi otomatis'">
     <div class="flex items-start gap-5">
-        <form action="{{ route('surat.store') }}" method="post" novalidate
+        <form action="{{ $ubah ? route('surat.update', $surat) : route('surat.store') }}" method="post" novalidate
               class="w-full max-w-[732px] rounded-[18px] border border-line bg-card p-6">
             @csrf
+            @if ($ubah) @method('put') @endif
 
             <x-kolom nama="warga_id" label="Cari warga (NIK atau nama)">
                 <div class="relative">
@@ -33,31 +36,36 @@
 
             <div class="mt-4 grid grid-cols-2 gap-x-4 gap-y-4">
                 <x-kolom nama="jenis_surat_id" label="Jenis surat">
-                    <x-pilihan nama="jenis_surat_id" :opsi="$jenisSurat->pluck('nama', 'id')->all()" placeholder="Pilih jenis surat" />
+                    @if ($ubah)
+                        {{-- Nomor surat memuat kode jenis, jadi jenis tidak dapat diganti (AB-03). --}}
+                        <div class="flex h-[38px] items-center rounded-full bg-surf px-4 text-[13px] text-muted">{{ $surat->jenisSurat->nama }}</div>
+                    @else
+                        <x-pilihan nama="jenis_surat_id" :opsi="$jenisSurat->pluck('nama', 'id')->all()" placeholder="Pilih jenis surat" />
+                    @endif
                 </x-kolom>
 
                 <x-kolom nama="tanggal_surat" label="Tanggal surat">
-                    <x-tanggal nama="tanggal_surat" :nilai="now()->toDateString()" placeholder="Pilih tanggal surat" />
+                    <x-tanggal nama="tanggal_surat" :nilai="$surat->tanggal_surat?->toDateString() ?? now()->toDateString()" placeholder="Pilih tanggal surat" />
                 </x-kolom>
 
                 <x-kolom nama="keperluan" label="Keperluan" class="col-span-2">
                     <input id="keperluan" name="keperluan" type="text" maxlength="255" placeholder="Contoh: Persyaratan kerja"
-                           value="{{ old('keperluan') }}" class="{{ $input('keperluan') }}">
+                           value="{{ old('keperluan', $surat->keperluan) }}" class="{{ $input('keperluan') }}">
                 </x-kolom>
 
                 <x-kolom nama="keterangan" label="Keterangan tambahan (opsional)" class="col-span-2">
                     <textarea id="keterangan" name="keterangan" rows="4" placeholder="Catatan untuk isi surat"
-                              class="w-full rounded-xl bg-surf px-4 py-3 text-[13px] outline-none placeholder:text-muted {{ $errors->has('keterangan') ? 'ring-1 ring-error' : '' }}">{{ old('keterangan') }}</textarea>
+                              class="w-full rounded-xl bg-surf px-4 py-3 text-[13px] outline-none placeholder:text-muted {{ $errors->has('keterangan') ? 'ring-1 ring-error' : '' }}">{{ old('keterangan', $surat->keterangan) }}</textarea>
                 </x-kolom>
             </div>
 
             <div class="mt-6 flex items-center gap-3">
                 <button type="submit"
                         class="flex h-9 items-center gap-2 rounded-full bg-blue px-5 text-[13px] font-medium text-white hover:bg-blue/90">
-                    <x-ikon nama="surat-baru" :ukuran="16" />
-                    Buat Surat
+                    <x-ikon :nama="$ubah ? 'cek' : 'surat-baru'" :ukuran="16" />
+                    {{ $ubah ? 'Simpan Perubahan' : 'Buat Surat' }}
                 </button>
-                <a href="{{ route('dasbor') }}"
+                <a href="{{ $ubah ? route('surat.show', $surat) : route('dasbor') }}"
                    class="flex h-9 items-center rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">Batal</a>
             </div>
         </form>

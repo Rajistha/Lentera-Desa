@@ -13,9 +13,11 @@ class SuratRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        // Jenis surat hanya ditentukan saat surat dibuat; saat diubah nilainya diabaikan.
+        $jenis = $this->route('surat') ? [] : ['jenis_surat_id' => ['required', 'exists:jenis_surat,id']];
+
+        return $jenis + [
             'warga_id' => ['required', 'exists:warga,id'],
-            'jenis_surat_id' => ['required', 'exists:jenis_surat,id'],
             'tanggal_surat' => ['required', 'date'],
             'keperluan' => ['required', 'string', 'max:255'],
             'keterangan' => ['nullable', 'string', 'max:2000'],

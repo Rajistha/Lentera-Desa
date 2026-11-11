@@ -57,6 +57,12 @@
             </a>
         @endif
 
+        <a href="{{ route('surat.edit', $surat) }}"
+           class="flex h-9 items-center gap-2 rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">
+            <x-ikon nama="ubah" :ukuran="16" />
+            Ubah
+        </a>
+
         <form action="{{ route('surat.buat-ulang-pdf', $surat) }}" method="post">
             @csrf
             <button type="submit"
@@ -65,6 +71,16 @@
                             'bg-blue text-white hover:bg-blue/90' => ! $pdfAda])>
                 <x-ikon nama="ulang" :ukuran="16" />
                 Buat Ulang PDF
+            </button>
+        </form>
+
+        <form action="{{ route('surat.destroy', $surat) }}" method="post"
+              onsubmit="return confirm('Hapus surat {{ e($surat->nomor_surat) }}? PDF-nya ikut dihapus dan tindakan ini tidak dapat dibatalkan.')">
+            @csrf
+            @method('delete')
+            <button type="submit" class="flex h-9 items-center gap-2 rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">
+                <x-ikon nama="hapus" :ukuran="16" class="text-error" />
+                Hapus
             </button>
         </form>
     </div>

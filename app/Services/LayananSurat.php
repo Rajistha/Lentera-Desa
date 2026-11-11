@@ -56,6 +56,51 @@ class LayananSurat
     }
 
     /**
+     * Ubah data surat (KF-13). Nomor, jenis, dan tahun tetap (AB-03); PDF dibuat
+     * ulang. Bila PDF baru gagal dibuat, PDF lama dihapus agar tidak ada berkas
+     * yang isinya sudah tidak sesuai dengan data surat.
+     *
+     * @return string|null null bila PDF berhasil dibuat ulang; selain itu pesan galat PDF
+     */
+    public function perbarui(Surat $surat, array $data): ?string
+    {
+        $surat->update([
+            'warga_id' => $data['warga_id'],
+            'tanggal_surat' => Carbon::parse($data['tanggal_surat'])->toDateString(),
+            'keperluan' => $data['keperluan'],
+            'keterangan' => $data['keterangan'] ?? null,
+        ]);
+        $surat->unsetRelation('warga');
+
+        $galat = $this->buatPdf($surat);
+
+        if ($galat !== null) {
+            $this->hapusBerkas($surat);
+            $surat->update(['berkas_pdf' => null]);
+        }
+
+        return $galat;
+    }
+
+    /** Hapus surat (KF-14) beserta berkas PDF-nya. */
+    public function hapus(Surat $surat): void
+    {
+        $berkas = $surat->berkas_pdf;
+        $surat->delete();
+
+        if ($berkas) {
+            Storage::disk('local')->delete($berkas);
+        }
+    }
+
+    private function hapusBerkas(Surat $surat): void
+    {
+        if ($surat->berkas_pdf) {
+            Storage::disk('local')->delete($surat->berkas_pdf);
+        }
+    }
+
+    /**
      * Buat PDF surat dari templat jenisnya dan catat lokasinya.
      *
      * @return string|null null bila berhasil; bila gagal, pesan yang aman ditampilkan

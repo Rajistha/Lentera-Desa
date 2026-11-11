@@ -20,9 +20,42 @@ class SuratController extends Controller
         $terpilih = Warga::find(old('warga_id', $request->query('warga')));
 
         return view('surat.buat', [
+            'surat' => new Surat,
             'jenisSurat' => JenisSurat::orderBy('nama')->get(),
             'terpilih' => $terpilih ? self::ringkasWarga($terpilih) : null,
         ]);
+    }
+
+    public function edit(Surat $surat): View
+    {
+        $surat->load('jenisSurat');
+        $terpilih = Warga::find(old('warga_id', $surat->warga_id));
+
+        return view('surat.buat', [
+            'surat' => $surat,
+            'jenisSurat' => collect(),
+            'terpilih' => $terpilih ? self::ringkasWarga($terpilih) : null,
+        ]);
+    }
+
+    public function update(SuratRequest $request, Surat $surat, LayananSurat $layanan): RedirectResponse
+    {
+        $galatPdf = $layanan->perbarui($surat, $request->validated());
+
+        $redirect = redirect()->route('surat.show', $surat);
+
+        return $galatPdf === null
+            ? $redirect->with('sukses', "Surat {$surat->nomor_surat} berhasil diperbarui dan PDF dibuat ulang.")
+            : $redirect->with('galat', "Perubahan surat {$surat->nomor_surat} tersimpan, tetapi PDF belum diperbarui: {$galatPdf}");
+    }
+
+    public function destroy(Surat $surat, LayananSurat $layanan): RedirectResponse
+    {
+        $nomor = $surat->nomor_surat;
+        $layanan->hapus($surat);
+
+        // Halaman Arsip dikerjakan di langkah 9; sementara kembali ke Dasbor.
+        return redirect()->route('dasbor')->with('sukses', "Surat {$nomor} berhasil dihapus.");
     }
 
     public function store(SuratRequest $request, LayananSurat $layanan): RedirectResponse
