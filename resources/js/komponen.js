@@ -55,7 +55,13 @@ function pilihan(root) {
 
     const tandaiAktif = () => {
         opsi.forEach((o, i) => o.toggleAttribute('data-aktif', i === aktif));
-        opsi[aktif]?.scrollIntoView({ block: 'nearest' });
+
+        // Gulir hanya di dalam daftar; scrollIntoView() ikut menggulir seluruh halaman.
+        const o = opsi[aktif];
+        if (o) {
+            if (o.offsetTop < daftar.scrollTop) daftar.scrollTop = o.offsetTop;
+            else if (o.offsetTop + o.offsetHeight > daftar.scrollTop + daftar.clientHeight) daftar.scrollTop = o.offsetTop + o.offsetHeight - daftar.clientHeight;
+        }
     };
 
     const tutup = () => {

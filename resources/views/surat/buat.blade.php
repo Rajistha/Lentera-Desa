@@ -31,7 +31,8 @@
                            class="{{ $input('warga_id') }} pl-11">
                     <input type="hidden" name="warga_id" id="warga_id_nilai" value="{{ $terpilih['id'] ?? '' }}">
                     <ul id="hasil-warga" role="listbox" hidden
-                        class="absolute z-10 mt-1 w-full overflow-hidden rounded-2xl border border-line bg-card py-1 shadow-lg"></ul>
+                        {{-- Tanpa padding vertikal: elemen sticky di dasar menempel di batas konten, sehingga padding meninggalkan celah tempat teks pilihan mengintip. --}}
+                        class="absolute z-10 mt-1 max-h-80 w-full overflow-y-auto overscroll-contain rounded-2xl border border-line bg-card shadow-lg"></ul>
                 </div>
             </x-kolom>
 
@@ -113,7 +114,19 @@
                 tutup();
             };
 
-            const tampilkanHasil = (hasil) => {
+            const pilihan = () => [...daftar.querySelectorAll('[role="option"]')];
+
+            // Fokus tanpa menggulir halaman; yang digulir hanya kotak daftar, dengan memperhitungkan keterangan di dasarnya.
+            const fokusPilihan = (li) => {
+                li.focus({ preventScroll: true });
+                const tinggiInfo = daftar.querySelector('[data-info]')?.offsetHeight ?? 0;
+                const atas = li.offsetTop;
+                const bawah = atas + li.offsetHeight;
+                if (atas < daftar.scrollTop) daftar.scrollTop = atas;
+                else if (bawah > daftar.scrollTop + daftar.clientHeight - tinggiInfo) daftar.scrollTop = bawah - daftar.clientHeight + tinggiInfo;
+            };
+
+            const tampilkanHasil = ({ data: hasil, total }) => {
                 daftar.replaceChildren();
                 if (!hasil.length) {
                     const kosong = document.createElement('li');
@@ -134,9 +147,29 @@
                     nik.textContent = w.nik;
                     li.append(nama, nik);
                     li.addEventListener('click', () => pilih(w));
-                    li.addEventListener('keydown', (e) => { if (e.key === 'Enter') pilih(w); });
+                    li.addEventListener('keydown', (e) => {
+                        const semua = pilihan();
+                        const i = semua.indexOf(li);
+                        if (e.key === 'Enter') { e.preventDefault(); pilih(w); }
+                        else if (e.key === 'ArrowDown') { e.preventDefault(); fokusPilihan(semua[Math.min(i + 1, semua.length - 1)]); }
+                        else if (e.key === 'ArrowUp') { e.preventDefault(); if (i === 0) cari.focus(); else fokusPilihan(semua[i - 1]); }
+                        else if (e.key === 'Home') { e.preventDefault(); fokusPilihan(semua[0]); }
+                        else if (e.key === 'End') { e.preventDefault(); fokusPilihan(semua[semua.length - 1]); }
+                        else if (e.key === 'Escape') { tutup(); cari.focus(); }
+                    });
                     daftar.append(li);
                 });
+
+                // Daftar dibatasi; beri tahu bila ada hasil lain yang tidak ditampilkan.
+                if (total > hasil.length) {
+                    const info = document.createElement('li');
+                    info.setAttribute('role', 'presentation');
+                    info.dataset.info = '';
+                    info.className = 'sticky bottom-0 border-t border-line bg-card px-4 py-2 text-xs text-muted';
+                    const f = new Intl.NumberFormat('id-ID');
+                    info.textContent = `Menampilkan ${f.format(hasil.length)} dari ${f.format(total)} hasil. Ketik lebih spesifik untuk mempersempit.`;
+                    daftar.append(info);
+                }
                 daftar.hidden = false;
                 cari.setAttribute('aria-expanded', 'true');
             };
@@ -158,7 +191,10 @@
             });
 
             document.addEventListener('click', (e) => { if (!daftar.contains(e.target) && e.target !== cari) tutup(); });
-            cari.addEventListener('keydown', (e) => { if (e.key === 'Escape') tutup(); });
+            cari.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') tutup();
+                if (e.key === 'ArrowDown' && !daftar.hidden) { e.preventDefault(); if (pilihan()[0]) fokusPilihan(pilihan()[0]); }
+            });
         })();
     </script>
 </x-layout-aplikasi>

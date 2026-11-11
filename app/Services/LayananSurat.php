@@ -111,6 +111,10 @@ class LayananSurat
         $surat->loadMissing('jenisSurat', 'warga');
         $disk = Storage::disk('local');
 
+        if (! $surat->warga->exists) {
+            return 'Data warga untuk surat ini sudah tidak ada. Ubah surat dan pilih warga yang benar.';
+        }
+
         if (! $disk->exists($surat->jenisSurat->templat)) {
             return 'Berkas templat jenis surat tidak ditemukan. Hubungi administrator.';
         }

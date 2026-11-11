@@ -140,6 +140,36 @@ class TampilanTest extends TestCase
         }
     }
 
+    /* ---------- daftar yang bisa digulir tidak menggulir seluruh halaman ---------- */
+
+    public function test_kotak_daftar_menahan_gulir_agar_tidak_menggulir_halaman(): void
+    {
+        $operator = $this->operator();
+
+        // Saran warga (kotak bergulir sendiri) dan dropdown pilihan memakai overscroll-contain.
+        $buat = $this->actingAs($operator)->get('/surat/buat')->getContent();
+        $this->assertMatchesRegularExpression('/id="hasil-warga"[^>]*overscroll-contain/s', $buat);
+        $this->assertMatchesRegularExpression('/role="listbox"[^>]*overscroll-contain/s', $buat);
+
+        $this->actingAs($operator)->get('/warga/create')->assertSee('overscroll-contain', false);
+    }
+
+    public function test_javascript_tidak_memakai_scrollintoview_yang_ikut_menggulir_halaman(): void
+    {
+        $pelanggaran = [];
+
+        foreach ([resource_path('views'), resource_path('js')] as $folder) {
+            foreach (File::allFiles($folder) as $berkas) {
+                // komentar boleh menyebut namanya; yang dilarang adalah pemanggilannya
+                if (preg_match('/scrollIntoView\s*\(/', preg_replace('#//.*|/\*.*?\*/#s', '', $berkas->getContents()))) {
+                    $pelanggaran[] = $berkas->getRelativePathname();
+                }
+            }
+        }
+
+        $this->assertSame([], $pelanggaran, 'Gulir kotak lewat scrollTop, bukan scrollIntoView() yang ikut menggulir halaman.');
+    }
+
     /* ---------- animasi memuat pada aksi yang memakan waktu ---------- */
 
     public function test_lapisan_memuat_tersedia_di_halaman_aplikasi_dan_tersembunyi_di_awal(): void

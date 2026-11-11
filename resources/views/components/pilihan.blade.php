@@ -16,7 +16,7 @@
         <x-ikon nama="bawah" :ukuran="16" class="text-muted" />
     </button>
     <ul id="{{ $nama }}-daftar" role="listbox" hidden
-        class="absolute z-30 mt-1.5 max-h-64 w-full overflow-auto rounded-2xl border border-line bg-card p-1.5 shadow-lg">
+        class="absolute z-30 mt-1.5 max-h-64 w-full overflow-auto overscroll-contain rounded-2xl border border-line bg-card p-1.5 shadow-lg">
         @unless ($wajib)
             <li role="option" data-nilai="" data-label="{{ $placeholder }}" aria-selected="{{ $terpilih === null ? 'true' : 'false' }}"
                 class="{{ $item }} text-muted">

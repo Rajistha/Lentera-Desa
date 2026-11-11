@@ -34,9 +34,20 @@ class Surat extends Model
         return $this->belongsTo(JenisSurat::class);
     }
 
+    /**
+     * Warga pada surat. Kunci asing RESTRICT mencegah warga yang punya surat dihapus, tetapi data dapat
+     * dikosongkan langsung di basis data (mis. TRUNCATE di phpMyAdmin dengan pemeriksaan kunci dimatikan).
+     * Agar halaman tidak galat, warga yang hilang diganti objek kosong bertanda (->exists === false).
+     */
     public function warga(): BelongsTo
     {
-        return $this->belongsTo(Warga::class);
+        return $this->belongsTo(Warga::class)->withDefault(fn (Warga $warga) => $warga->forceFill([
+            'nama' => 'Data tidak ditemukan',
+            'nik' => '-',
+            'alamat' => '-',
+            'rt' => '-',
+            'rw' => '-',
+        ]));
     }
 
     public function user(): BelongsTo

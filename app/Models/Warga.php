@@ -41,6 +41,19 @@ class Warga extends Model
         ];
     }
 
+    /** Dua huruf awal nama untuk avatar; "?" bila warganya tidak ada. */
+    public function getInisialAttribute(): string
+    {
+        if (! $this->exists) {
+            return '?';
+        }
+
+        return collect(preg_split('/\s+/', trim((string) $this->nama)))
+            ->take(2)
+            ->map(fn ($kata) => mb_strtoupper(mb_substr($kata, 0, 1)))
+            ->implode('');
+    }
+
     public function surat(): HasMany
     {
         return $this->hasMany(Surat::class);

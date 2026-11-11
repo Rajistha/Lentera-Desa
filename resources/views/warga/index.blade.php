@@ -40,7 +40,7 @@
                         <td class="px-3">
                             <span class="flex items-center gap-3">
                                 <span class="flex size-7 items-center justify-center rounded-full bg-hl text-[10px] font-bold text-blue">
-                                    {{ collect(preg_split('/\s+/', trim($warga->nama)))->take(2)->map(fn ($k) => mb_strtoupper(mb_substr($k, 0, 1)))->implode('') }}
+                                    {{ $warga->inisial }}
                                 </span>
                                 {{ $warga->nama }}
                             </span>

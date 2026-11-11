@@ -117,6 +117,48 @@ class SuratTest extends TestCase
         $this->assertNull(Surat::first()->keterangan);
     }
 
+    /* ---------- saran warga pada formulir buat surat ---------- */
+
+    public function test_saran_warga_dibatasi_sepuluh_dan_melaporkan_total_serta_urut_nama(): void
+    {
+        foreach (range(1, 25) as $i) {
+            $this->warga(['nama' => sprintf('Cari Uji %02d', 26 - $i)]); // dibuat terbalik agar urutan nama teruji
+        }
+        $this->warga(['nama' => 'Tidak Ikut']);
+
+        $json = $this->actingAs($this->operator())->getJson('/surat/cari-warga?q=Cari Uji')->assertOk()->json();
+
+        $this->assertSame(10, $json['batas']);
+        $this->assertSame(25, $json['total'], 'total mencakup yang tidak ditampilkan');
+        $this->assertCount(10, $json['data']);
+        $this->assertSame('Cari Uji 01', $json['data'][0]['nama']);
+        $this->assertSame('Cari Uji 10', $json['data'][9]['nama']);
+        $this->assertSame(array_column($json['data'], 'nama'), collect($json['data'])->pluck('nama')->sort()->values()->all());
+    }
+
+    public function test_saran_warga_tanpa_pemotongan_bila_hasil_kurang_dari_batas(): void
+    {
+        $this->warga(['nik' => '3573010101900001', 'nama' => 'Budi Santoso']);
+        $this->warga(['nik' => '3573010101900002', 'nama' => 'Siti Aminah']);
+
+        $json = $this->actingAs($this->operator())->getJson('/surat/cari-warga?q=3573')->json();
+        $this->assertSame(2, $json['total']);
+        $this->assertCount(2, $json['data']);
+        $this->assertSame(['id', 'nik', 'nama', 'ttl', 'jenis_kelamin', 'alamat', 'pekerjaan', 'status'], array_keys($json['data'][0]));
+
+        $this->assertSame(1, $this->actingAs($this->operator())->getJson('/surat/cari-warga?q=Siti')->json('total'));
+        $this->assertSame(0, $this->actingAs($this->operator())->getJson('/surat/cari-warga?q=tidak-ada')->json('total'));
+    }
+
+    public function test_saran_warga_butuh_dua_karakter_dan_hanya_untuk_operator(): void
+    {
+        $this->warga(['nama' => 'Budi']);
+
+        $this->assertSame(['data' => [], 'total' => 0, 'batas' => 10], $this->actingAs($this->operator())->getJson('/surat/cari-warga?q=B')->json());
+        $this->assertSame(['data' => [], 'total' => 0, 'batas' => 10], $this->actingAs($this->operator())->getJson('/surat/cari-warga')->json());
+        $this->actingAs($this->admin())->getJson('/surat/cari-warga?q=Bu')->assertForbidden();
+    }
+
     /* ---------- detail dan unduh ---------- */
 
     public function test_detail_menampilkan_data_surat_dan_tombol_aksi(): void

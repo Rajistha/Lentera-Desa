@@ -1,10 +1,11 @@
 @php
+    $wargaAda = $surat->warga->exists;
     $baris = [
         'Nomor surat' => $surat->nomor_surat,
         'Jenis surat' => $surat->jenisSurat->nama,
         'Nama warga' => $surat->warga->nama,
         'NIK' => $surat->warga->nik,
-        'Alamat' => $surat->warga->alamat.', RT '.$surat->warga->rt.'/RW '.$surat->warga->rw,
+        'Alamat' => $wargaAda ? $surat->warga->alamat.', RT '.$surat->warga->rt.'/RW '.$surat->warga->rw : '-',
         'Keperluan' => $surat->keperluan,
         'Keterangan' => $surat->keterangan ?: '-',
         'Tanggal surat' => $surat->tanggal_surat->copy()->locale('id')->translatedFormat('d M Y'),
@@ -24,6 +25,12 @@
     <div class="flex items-start gap-5">
         <section class="w-full max-w-[440px] shrink-0 rounded-[18px] border border-line bg-card p-6" aria-labelledby="judul-data">
             <h2 id="judul-data" class="text-[11px] font-bold uppercase tracking-[0.8px]">Data surat</h2>
+            @unless ($wargaAda)
+                <p role="alert" class="mt-3 flex items-start gap-2 rounded-xl bg-error/10 px-4 py-3 text-xs text-error">
+                    <x-ikon nama="galat" :ukuran="14" class="mt-px" />
+                    Warga pada surat ini sudah tidak ada di data warga. Tekan Ubah dan pilih warga yang benar agar PDF dapat dibuat.
+                </p>
+            @endunless
             <dl class="mt-4 space-y-3">
                 @foreach ($baris as $label => $isi)
                     <div>

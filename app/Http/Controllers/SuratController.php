@@ -17,6 +17,9 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SuratController extends Controller
 {
+    /** Jumlah saran warga maksimum pada kolom pencarian di formulir buat surat. */
+    private const BATAS_SARAN_WARGA = 10;
+
     /** Arsip surat: daftar dengan filter jenis, rentang tanggal, dan nama/NIK/nomor (KF-15). */
     public function index(Request $request): View
     {
@@ -170,18 +173,19 @@ class SuratController extends Controller
         $kata = trim((string) $request->query('q'));
 
         if (mb_strlen($kata) < 2) {
-            return response()->json([]);
+            return response()->json(['data' => [], 'total' => 0, 'batas' => self::BATAS_SARAN_WARGA]);
         }
 
         $like = '%'.addcslashes($kata, '%_\\').'%';
+        $cocok = Warga::where(fn ($q) => $q->where('nik', 'like', $like)->orWhere('nama', 'like', $like));
 
-        return response()->json(
-            Warga::where(fn ($q) => $q->where('nik', 'like', $like)->orWhere('nama', 'like', $like))
-                ->orderBy('nama')
-                ->limit(8)
-                ->get()
-                ->map(fn (Warga $w) => self::ringkasWarga($w))
-        );
+        // "total" memungkinkan tampilan memberi tahu bila daftar terpotong oleh batas.
+        return response()->json([
+            'data' => (clone $cocok)->orderBy('nama')->limit(self::BATAS_SARAN_WARGA)->get()
+                ->map(fn (Warga $w) => self::ringkasWarga($w))->values(),
+            'total' => $cocok->count(),
+            'batas' => self::BATAS_SARAN_WARGA,
+        ]);
     }
 
     private static function ringkasWarga(Warga $w): array

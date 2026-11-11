@@ -53,9 +53,9 @@
                     <td class="px-3">
                         <span class="flex items-center gap-3">
                             <span class="flex size-7 items-center justify-center rounded-full bg-hl text-[10px] font-bold text-blue">
-                                {{ collect(preg_split('/\s+/', trim($surat->warga->nama)))->take(2)->map(fn ($k) => mb_strtoupper(mb_substr($k, 0, 1)))->implode('') }}
+                                {{ $surat->warga->inisial }}
                             </span>
-                            {{ $surat->warga->nama }}
+                            <span @class(['italic text-muted' => ! $surat->warga->exists])>{{ $surat->warga->nama }}</span>
                         </span>
                     </td>
                     <td class="px-3"><span class="rounded-full bg-hl px-2.5 py-1 text-xs font-medium text-blue">{{ $surat->jenisSurat->nama }}</span></td>
