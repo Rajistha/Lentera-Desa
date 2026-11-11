@@ -10,7 +10,7 @@
             ['Dasbor', 'dasbor', 'dasbor', 'dasbor'],
             ['Data Warga', 'warga.index', 'warga', 'warga*'],
             ['Buat Surat', 'surat.create', 'surat-baru', 'surat/buat'],
-            ['Arsip Surat', 'dasbor', 'arsip', fn () => request()->is('surat') || (request()->is('surat/*') && ! request()->is('surat/buat'))],
+            ['Arsip Surat', 'surat.index', 'arsip', fn () => request()->is('surat') || (request()->is('surat/*') && ! request()->is('surat/buat'))],
             ['Rekap Layanan', 'dasbor', 'rekap', 'rekap*'],
         ];
 

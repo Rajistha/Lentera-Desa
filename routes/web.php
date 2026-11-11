@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/warga/impor', [ImporWargaController::class, 'proses'])->name('warga.impor.proses');
         Route::resource('warga', WargaController::class)->except('show');
 
+        Route::get('/surat', [SuratController::class, 'index'])->name('surat.index');
         Route::get('/surat/buat', [SuratController::class, 'create'])->name('surat.create');
         Route::get('/surat/cari-warga', [SuratController::class, 'cariWarga'])->name('surat.cari-warga');
         Route::post('/surat', [SuratController::class, 'store'])->name('surat.store');

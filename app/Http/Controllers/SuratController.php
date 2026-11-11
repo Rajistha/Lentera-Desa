@@ -10,11 +10,58 @@ use App\Services\LayananSurat;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SuratController extends Controller
 {
+    /** Arsip surat: daftar dengan filter jenis, rentang tanggal, dan nama/NIK/nomor (KF-15). */
+    public function index(Request $request): View
+    {
+        $validator = Validator::make($request->query(), [
+            'jenis' => ['nullable', 'integer', 'exists:jenis_surat,id'],
+            'dari' => ['nullable', 'date'],
+            'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
+            'q' => ['nullable', 'string', 'max:100'],
+        ], [
+            'jenis.exists' => 'Jenis surat tidak tersedia.',
+            'dari.date' => 'Tanggal awal tidak valid.',
+            'sampai.date' => 'Tanggal akhir tidak valid.',
+            'sampai.after_or_equal' => 'Tanggal akhir harus sama dengan atau setelah tanggal awal.',
+        ]);
+
+        // Filter yang tidak valid diabaikan dan galatnya ditampilkan di bawah kolomnya.
+        $filter = $validator->valid();
+        $kata = trim((string) ($filter['q'] ?? ''));
+        $like = '%'.addcslashes($kata, '%_\\').'%';
+
+        $daftar = Surat::query()
+            ->with('warga:id,nik,nama', 'jenisSurat:id,kode,nama')
+            ->when($filter['jenis'] ?? null, fn ($q, $jenis) => $q->where('jenis_surat_id', $jenis))
+            ->when($filter['dari'] ?? null, fn ($q, $dari) => $q->whereDate('tanggal_surat', '>=', $dari))
+            ->when($filter['sampai'] ?? null, fn ($q, $sampai) => $q->whereDate('tanggal_surat', '<=', $sampai))
+            ->when($kata !== '', fn ($q) => $q->where(
+                fn ($q) => $q->where('nomor_surat', 'like', $like)
+                    ->orWhereHas('warga', fn ($w) => $w->where('nama', 'like', $like)->orWhere('nik', 'like', $like))
+            ))
+            ->orderByDesc('tanggal_surat')
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Dibagikan ke semua view agar komponen kolom/tanggal ikut menampilkan galat filter.
+        view()->share('errors', (new ViewErrorBag)->put('default', $validator->errors()));
+
+        return view('surat.index', [
+            'daftar' => $daftar,
+            'jenisSurat' => JenisSurat::orderBy('nama')->pluck('nama', 'id')->all(),
+            'filter' => $filter,
+            'adaFilter' => collect($filter)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty(),
+        ]);
+    }
+
     public function create(Request $request): View
     {
         $terpilih = Warga::find(old('warga_id', $request->query('warga')));
@@ -54,8 +101,7 @@ class SuratController extends Controller
         $nomor = $surat->nomor_surat;
         $layanan->hapus($surat);
 
-        // Halaman Arsip dikerjakan di langkah 9; sementara kembali ke Dasbor.
-        return redirect()->route('dasbor')->with('sukses', "Surat {$nomor} berhasil dihapus.");
+        return redirect()->route('surat.index')->with('sukses', "Surat {$nomor} berhasil dihapus.");
     }
 
     public function store(SuratRequest $request, LayananSurat $layanan): RedirectResponse

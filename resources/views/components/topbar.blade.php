@@ -3,7 +3,7 @@
 <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-line bg-card px-8">
     <div>
         @if ($pengguna->role === 'operator')
-            <form action="{{ route('warga.index') }}" method="get" role="search"
+            <form action="{{ route('surat.index') }}" method="get" role="search"
                   class="flex h-10 w-[380px] items-center gap-2.5 rounded-full bg-surf px-4">
                 <x-ikon nama="cari" :ukuran="16" class="text-muted" />
                 <input type="search" name="q" placeholder="Cari NIK, nama, atau nomor surat..."

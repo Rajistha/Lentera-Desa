@@ -13,6 +13,14 @@
 @endphp
 
 <x-layout-aplikasi judul="Detail Surat" :subjudul="'No. '.$surat->nomor_surat">
+    <x-slot:aksi>
+        <a href="{{ route('surat.index') }}"
+           class="flex h-9 items-center gap-2 rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">
+            <x-ikon nama="kiri" :ukuran="16" />
+            Kembali ke Arsip
+        </a>
+    </x-slot:aksi>
+
     <div class="flex items-start gap-5">
         <section class="w-full max-w-[440px] shrink-0 rounded-[18px] border border-line bg-card p-6" aria-labelledby="judul-data">
             <h2 id="judul-data" class="text-[11px] font-bold uppercase tracking-[0.8px]">Data surat</h2>
