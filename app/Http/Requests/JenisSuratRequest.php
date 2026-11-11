@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\DokumenWord;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
-use ZipArchive;
 
 class JenisSuratRequest extends FormRequest
 {
@@ -35,32 +34,9 @@ class JenisSuratRequest extends FormRequest
                 'bail',
                 $ubah ? 'nullable' : 'required',
                 'file', 'extensions:docx', 'max:2048',
-                function (string $atribut, mixed $berkas, \Closure $gagal) {
-                    if ($berkas instanceof UploadedFile && ! $this->dokumenWordValid($berkas)) {
-                        $gagal('Berkas bukan dokumen Word (.docx) yang valid.');
-                    }
-                },
+                new DokumenWord,
             ],
         ];
-    }
-
-    /**
-     * Templat adalah data: harus .docx asli dan tidak boleh membawa makro.
-     * Diperiksa lewat isi zip, bukan MIME, karena sebagian .docx valid
-     * terdeteksi sebagai application/zip.
-     */
-    private function dokumenWordValid(UploadedFile $berkas): bool
-    {
-        $zip = new ZipArchive;
-        if ($zip->open($berkas->getRealPath()) !== true) {
-            return false;
-        }
-
-        $valid = $zip->locateName('word/document.xml') !== false
-            && $zip->locateName('word/vbaProject.bin') === false;
-        $zip->close();
-
-        return $valid;
     }
 
     public function messages(): array

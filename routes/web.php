@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HalamanController;
 use App\Http\Controllers\ImporWargaController;
 use App\Http\Controllers\JenisSuratController;
+use App\Http\Controllers\PratinjauTemplatController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,15 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('peran:administrator')->group(function () {
+        Route::get('/jenis-surat/{jenisSurat}/pratinjau', [PratinjauTemplatController::class, 'simpanan'])
+            ->name('jenis-surat.pratinjau.simpanan');
+        // PUT diterima juga karena formulir ubah memakai method spoofing.
+        Route::match(['post', 'put'], '/jenis-surat/pratinjau', [PratinjauTemplatController::class, 'unggahan'])
+            ->name('jenis-surat.pratinjau.unggahan');
+        Route::get('/jenis-surat/pratinjau/{token}', [PratinjauTemplatController::class, 'tampil'])
+            ->where('token', '[A-Za-z0-9]{32}')->name('jenis-surat.pratinjau.tampil');
+        Route::get('/jenis-surat/pratinjau/{token}/pdf', [PratinjauTemplatController::class, 'pdf'])
+            ->where('token', '[A-Za-z0-9]{32}')->name('jenis-surat.pratinjau.pdf');
         Route::resource('jenis-surat', JenisSuratController::class)
             ->except(['show', 'create'])
             ->parameters(['jenis-surat' => 'jenisSurat']);

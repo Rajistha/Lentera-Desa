@@ -17,7 +17,7 @@
     $peran = $pengguna->role === 'administrator' ? 'Administrator' : 'Operator';
 @endphp
 
-<aside class="flex w-60 shrink-0 flex-col bg-side px-5 py-6">
+<aside class="sticky top-0 flex h-screen w-60 shrink-0 flex-col self-start overflow-y-auto bg-side px-5 py-6">
     <a href="{{ url('/') }}" class="mb-6 flex items-center gap-3 px-1">
         <x-logo />
         <span class="text-lg font-bold text-blue">Lentera Desa</span>
@@ -43,7 +43,7 @@
         </span>
         <div class="min-w-0">
             <p class="truncate text-[13px] font-bold">{{ $pengguna->name }}</p>
-            <p class="text-[11px] text-muted">Peran: {{ $peran }}</p>
+            <p class="text-[11px] text-muted">{{ $peran }}</p>
         </div>
     </div>
 </aside>

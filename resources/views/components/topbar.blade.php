@@ -14,7 +14,7 @@
     </div>
 
     <div class="flex items-center gap-3">
-        <span class="text-xs text-muted">Pengguna</span>
+        <span class="max-w-48 truncate text-xs text-muted">{{ $pengguna->name }}</span>
         <span class="flex size-8 items-center justify-center rounded-full bg-hl text-blue">
             <x-ikon nama="pengguna" :ukuran="16" />
         </span>

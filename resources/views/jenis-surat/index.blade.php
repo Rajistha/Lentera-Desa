@@ -1,5 +1,7 @@
 @php
     $ubah = $jenis->exists;
+    // Formulir hanya tampil saat menambah, mengubah, atau ada galat validasi.
+    $tampilForm = $ubah || request()->boolean('tambah') || $errors->any();
     $input = fn ($nama) => 'h-[38px] w-full rounded-full bg-surf px-4 text-[13px] outline-none placeholder:text-muted'
         .($errors->has($nama) ? ' ring-1 ring-error' : '');
     $tab = 'flex h-9 items-center gap-2 rounded-full px-5 text-[13px] font-medium';
@@ -7,7 +9,7 @@
 
 <x-layout-aplikasi judul="Kelola Jenis Surat" subjudul="Daftar, tambah, dan ubah jenis surat beserta templat Word">
     <x-slot:aksi>
-        <a href="{{ route('jenis-surat.index') }}#formulir"
+        <a href="{{ route('jenis-surat.index', ['tambah' => 1]) }}#formulir"
            class="flex h-9 items-center gap-2 rounded-full bg-blue px-5 text-[13px] font-medium text-white hover:bg-blue/90">
             <x-ikon nama="tambah" :ukuran="16" />
             Tambah Jenis
@@ -44,6 +46,10 @@
                             <td class="px-3 text-muted">{{ basename($item->templat) }}</td>
                             <td class="px-3">
                                 <span class="flex items-center gap-2">
+                                    <a href="{{ route('jenis-surat.pratinjau.simpanan', $item) }}" title="Pratinjau" aria-label="Pratinjau {{ $item->nama }}"
+                                       class="flex size-8 items-center justify-center rounded-xl bg-surf text-muted hover:bg-line">
+                                        <x-ikon nama="mata" :ukuran="16" />
+                                    </a>
                                     <a href="{{ route('jenis-surat.edit', $item) }}#formulir" title="Ubah" aria-label="Ubah {{ $item->nama }}"
                                        class="flex size-8 items-center justify-center rounded-xl bg-surf text-muted hover:bg-line">
                                         <x-ikon nama="ubah" :ukuran="16" />
@@ -69,6 +75,7 @@
             </table>
         </div>
 
+        @if ($tampilForm)
         <form id="formulir" action="{{ $ubah ? route('jenis-surat.update', $jenis) : route('jenis-surat.store') }}"
               method="post" enctype="multipart/form-data" novalidate
               class="w-[470px] shrink-0 rounded-[18px] border border-line bg-card p-6">
@@ -142,9 +149,16 @@
                     <x-ikon nama="cek" :ukuran="16" />
                     Simpan
                 </button>
+                @if ($ubah)<input type="hidden" name="jenis_id" value="{{ $jenis->id }}">@endif
+                <button type="submit" formaction="{{ route('jenis-surat.pratinjau.unggahan') }}" @unless ($ubah) formtarget="_blank" @endunless formnovalidate
+                        class="flex h-9 items-center gap-2 rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">
+                    <x-ikon nama="mata" :ukuran="16" />
+                    Pratinjau
+                </button>
                 <a href="{{ route('jenis-surat.index') }}"
                    class="flex h-9 items-center rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">Batal</a>
             </div>
         </form>
+        @endif
     </div>
 </x-layout-aplikasi>

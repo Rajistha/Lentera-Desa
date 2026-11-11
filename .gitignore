@@ -87,6 +87,8 @@ setup-git.sh
 /storage/app/templat/*
 /storage/app/surat/*
 !/storage/app/templat/.gitkeep
+/storage/app/pratinjau/
+/storage/framework/libreoffice-profil/
 !/storage/app/surat/.gitkeep
 
 # Cadangan basis data
