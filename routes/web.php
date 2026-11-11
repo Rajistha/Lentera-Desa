@@ -32,6 +32,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/surat/cari-warga', [SuratController::class, 'cariWarga'])->name('surat.cari-warga');
         Route::post('/surat', [SuratController::class, 'store'])->name('surat.store');
         Route::get('/surat/{surat}', [SuratController::class, 'show'])->name('surat.show');
+        Route::get('/surat/{surat}/pdf', [SuratController::class, 'pdf'])->name('surat.pdf');
+        Route::get('/surat/{surat}/unduh', [SuratController::class, 'unduh'])->name('surat.unduh');
+        Route::post('/surat/{surat}/buat-ulang-pdf', [SuratController::class, 'buatUlangPdf'])->name('surat.buat-ulang-pdf');
     });
 
     Route::middleware('peran:administrator')->group(function () {

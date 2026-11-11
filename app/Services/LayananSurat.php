@@ -86,6 +86,16 @@ class LayananSurat
         return null;
     }
 
+    /** Jalur absolut PDF surat bila berkasnya benar-benar ada; selain itu null. */
+    public function jalurPdf(Surat $surat): ?string
+    {
+        $disk = Storage::disk('local');
+
+        return $surat->berkas_pdf && $disk->exists($surat->berkas_pdf)
+            ? $disk->path($surat->berkas_pdf)
+            : null;
+    }
+
     /** Nilai penanda templat untuk satu surat. */
     public function dataTemplat(Surat $surat): array
     {

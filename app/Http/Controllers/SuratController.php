@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SuratController extends Controller
 {
@@ -37,9 +38,51 @@ class SuratController extends Controller
             : $redirect->with('galat', "Surat {$surat->nomor_surat} tersimpan, tetapi PDF belum dibuat: {$galatPdf}");
     }
 
-    public function show(Surat $surat): View
+    public function show(Surat $surat, LayananSurat $layanan): View
     {
-        return view('surat.detail', ['surat' => $surat->load('jenisSurat', 'warga', 'user')]);
+        return view('surat.detail', [
+            'surat' => $surat->load('jenisSurat', 'warga', 'user'),
+            'pdfAda' => $layanan->jalurPdf($surat) !== null,
+        ]);
+    }
+
+    /** Tampilkan PDF di peramban (untuk pratinjau di halaman detail). */
+    public function pdf(Surat $surat, LayananSurat $layanan): BinaryFileResponse|RedirectResponse
+    {
+        return $this->kirimPdf($surat, $layanan, false);
+    }
+
+    /** Unduh PDF; dapat diulang kapan saja (KF-11). */
+    public function unduh(Surat $surat, LayananSurat $layanan): BinaryFileResponse|RedirectResponse
+    {
+        return $this->kirimPdf($surat, $layanan, true);
+    }
+
+    /** Buat ulang PDF dari data surat dan templat saat ini; nomor tidak berubah. */
+    public function buatUlangPdf(Surat $surat, LayananSurat $layanan): RedirectResponse
+    {
+        $galat = $layanan->buatPdf($surat);
+
+        return redirect()->route('surat.show', $surat)->with(
+            $galat === null ? 'sukses' : 'galat',
+            $galat === null ? 'PDF berhasil dibuat ulang.' : "PDF gagal dibuat: {$galat}",
+        );
+    }
+
+    private function kirimPdf(Surat $surat, LayananSurat $layanan, bool $unduh): BinaryFileResponse|RedirectResponse
+    {
+        $jalur = $layanan->jalurPdf($surat);
+
+        if ($jalur === null) {
+            return redirect()->route('surat.show', $surat)
+                ->with('galat', 'PDF surat ini belum tersedia. Gunakan tombol Buat Ulang PDF.');
+        }
+
+        $nama = 'Surat-'.str_replace('/', '-', $surat->nomor_surat).'.pdf';
+
+        return $unduh
+            ? response()->download($jalur, $nama, ['Content-Type' => 'application/pdf'])
+            : response()->file($jalur, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline; filename="'.$nama.'"']);
     }
 
     /** Pencarian warga (NIK atau nama) untuk formulir buat surat. */
