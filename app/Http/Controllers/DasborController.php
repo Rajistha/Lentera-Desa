@@ -16,7 +16,9 @@ class DasborController extends Controller
 
         return view('dasbor', [
             'jumlahWarga' => Warga::count(),
-            'suratBulanIni' => Surat::whereBetween('tanggal_surat', [$awal->toDateString(), $awal->copy()->endOfMonth()->toDateString()])->count(),
+            'suratBulanIni' => Surat::whereDate('tanggal_surat', '>=', $awal->toDateString())
+                ->whereDate('tanggal_surat', '<=', $awal->copy()->endOfMonth()->toDateString())
+                ->count(),
             'jumlahJenis' => JenisSurat::count(),
             'terbaru' => Surat::with('warga:id,nama', 'jenisSurat:id,nama')->latest('id')->limit(5)->get(),
         ]);

@@ -54,7 +54,7 @@
                                     <x-ikon nama="ubah" :ukuran="16" />
                                 </a>
                                 <form action="{{ route('warga.destroy', $warga) }}" method="post"
-                                      onsubmit="return confirm('Hapus data {{ e($warga->nama) }}?')">
+                                      data-konfirmasi="Data {{ $warga->nama }} akan dihapus." data-konfirmasi-judul="Hapus data warga?" data-konfirmasi-tombol="Hapus" data-konfirmasi-gaya="bahaya">
                                     @csrf
                                     @method('delete')
                                     <button type="submit" title="Hapus" aria-label="Hapus {{ $warga->nama }}"

@@ -54,7 +54,7 @@ class TemplatRenderer
             '--convert-to', 'pdf',
             '--outdir', $folder,
             $docx,
-        ], $folder, null, null, config('lentera.libreoffice_timeout'));
+        ], $folder, $this->lingkunganLibreOffice(), null, config('lentera.libreoffice_timeout'));
 
         try {
             $proses->run();
@@ -65,8 +65,14 @@ class TemplatRenderer
 
         $pdf = preg_replace('/\.docx$/i', '.pdf', $docx);
         if (! $proses->isSuccessful() || ! is_file($pdf)) {
-            Log::error('Konversi PDF gagal', ['keluaran' => $proses->getOutput(), 'galat' => $proses->getErrorOutput()]);
-            throw new PdfGagal('PDF gagal dibuat. Periksa log aplikasi untuk rinciannya.');
+            Log::error('Konversi PDF gagal', [
+                'kode_keluar' => $proses->getExitCode(),
+                'perintah' => $proses->getCommandLine(),
+                'keluaran' => $proses->getOutput(),
+                'galat' => $proses->getErrorOutput(),
+                'pdf_ada' => is_file($pdf),
+            ]);
+            throw new PdfGagal('Proses konversi LibreOffice berhenti dengan galat. Periksa log aplikasi untuk rinciannya.');
         }
 
         return $pdf;
@@ -125,6 +131,31 @@ class TemplatRenderer
     public function romawi(int $bulan): string
     {
         return ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][$bulan - 1];
+    }
+
+    /**
+     * Lingkungan untuk proses LibreOffice. Pada server web (php -S, Apache) Symfony Process
+     * menyaring lingkungan turunan lewat $_SERVER; setelah Laravel di-boot, variabel inti
+     * Windows (SYSTEMROOT, TEMP, USERPROFILE, APPDATA) bisa hilang dan LibreOffice berhenti
+     * dengan kode 1 tanpa pesan. Karena itu lingkungan proses diteruskan secara eksplisit,
+     * tanpa rahasia aplikasi yang tidak dibutuhkan LibreOffice.
+     *
+     * @return array<string, string|false>
+     */
+    private function lingkunganLibreOffice(): array
+    {
+        $lingkungan = getenv() ?: [];
+
+        foreach (['APP_KEY', 'DB_PASSWORD', 'MAIL_PASSWORD', 'REDIS_PASSWORD', 'AWS_SECRET_ACCESS_KEY'] as $rahasia) {
+            $lingkungan[$rahasia] = false; // false = tidak diwariskan ke proses anak
+        }
+
+        // Pastikan folder sementara selalu terdefinisi.
+        $sementara = sys_get_temp_dir();
+        $lingkungan['TEMP'] = $lingkungan['TEMP'] ?? $sementara;
+        $lingkungan['TMP'] = $lingkungan['TMP'] ?? $sementara;
+
+        return $lingkungan;
     }
 
     private function jalurLibreOffice(): ?string

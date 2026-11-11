@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\JenisSurat;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Style\Language;
-use PhpOffice\PhpWord\IOFactory;
 
 class JenisSuratSeeder extends Seeder
 {
@@ -23,7 +23,7 @@ class JenisSuratSeeder extends Seeder
         Storage::disk('local')->makeDirectory('templat');
 
         foreach (self::JENIS as $jenis) {
-            $path = 'templat/' . strtolower($jenis['kode']) . '.docx';
+            $path = 'templat/'.strtolower($jenis['kode']).'.docx';
             $this->buatTemplat(Storage::disk('local')->path($path), $jenis['nama'], $jenis['isi']);
 
             JenisSurat::updateOrCreate(['kode' => $jenis['kode']], [
@@ -36,7 +36,7 @@ class JenisSuratSeeder extends Seeder
 
     private function buatTemplat(string $berkas, string $judul, string $isi): void
     {
-        $word = new PhpWord();
+        $word = new PhpWord;
         $word->getSettings()->setThemeFontLang(new Language('id-ID'));
         $word->setDefaultFontName('Times New Roman');
         $word->setDefaultFontSize(12);
@@ -72,7 +72,7 @@ class JenisSuratSeeder extends Seeder
         }
 
         $bagian->addTextBreak();
-        $bagian->addText('Orang tersebut ' . $isi);
+        $bagian->addText('Orang tersebut '.$isi);
         $bagian->addText('Keperluan: ${keperluan}');
         $bagian->addText('${keterangan}');
         $bagian->addTextBreak();

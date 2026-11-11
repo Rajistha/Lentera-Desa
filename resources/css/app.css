@@ -26,6 +26,28 @@
     }
 }
 
+@keyframes toast-masuk {
+    from {
+        opacity: 0;
+        transform: translateX(1rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.toast-masuk {
+    animation: toast-masuk 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-masuk {
+        animation: none;
+    }
+}
+
 @layer base {
     body {
         @apply bg-card font-sans text-[13px] text-ink antialiased;

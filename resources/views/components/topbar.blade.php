@@ -18,7 +18,8 @@
         <span class="flex size-8 items-center justify-center rounded-full bg-hl text-blue">
             <x-ikon nama="pengguna" :ukuran="16" />
         </span>
-        <form action="{{ route('logout') }}" method="post">
+        <form action="{{ route('logout') }}" method="post"
+              data-konfirmasi="Anda perlu masuk kembali untuk memakai Lentera Desa." data-konfirmasi-judul="Keluar dari aplikasi?" data-konfirmasi-tombol="Keluar">
             @csrf
             <button type="submit"
                     class="flex h-9 items-center gap-2 rounded-full bg-surf px-4 text-[13px] font-medium hover:bg-line">

@@ -144,7 +144,7 @@ class SuratController extends Controller
 
         return redirect()->route('surat.show', $surat)->with(
             $galat === null ? 'sukses' : 'galat',
-            $galat === null ? 'PDF berhasil dibuat ulang.' : "PDF gagal dibuat: {$galat}",
+            $galat === null ? 'PDF berhasil dibuat ulang.' : "PDF belum dapat dibuat ulang. {$galat}",
         );
     }
 

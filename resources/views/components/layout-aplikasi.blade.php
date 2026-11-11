@@ -20,22 +20,11 @@
                     @endisset
                 </div>
 
-                @if (session('sukses'))
-                    <div role="status" class="mb-5 flex items-center gap-2 rounded-xl bg-hl px-4 py-3 text-blue">
-                        <x-ikon nama="cek" :ukuran="16" />
-                        {{ session('sukses') }}
-                    </div>
-                @endif
-
-                @if (session('galat'))
-                    <div role="alert" class="mb-5 flex items-center gap-2 rounded-xl bg-error/10 px-4 py-3 text-error">
-                        <x-ikon nama="galat" :ukuran="16" />
-                        {{ session('galat') }}
-                    </div>
-                @endif
-
                 {{ $slot }}
             </main>
         </div>
     </div>
+
+    <x-toast />
+    <x-modal-konfirmasi />
 </x-layout-dasar>

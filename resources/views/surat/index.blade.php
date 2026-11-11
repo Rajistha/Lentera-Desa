@@ -88,7 +88,7 @@
                                     <x-ikon nama="ubah" :ukuran="16" />
                                 </a>
                                 <form action="{{ route('surat.destroy', $surat) }}" method="post"
-                                      onsubmit="return confirm('Hapus surat {{ e($surat->nomor_surat) }}? PDF-nya ikut dihapus dan tindakan ini tidak dapat dibatalkan.')">
+                                      data-konfirmasi="Surat {{ $surat->nomor_surat }} dan berkas PDF-nya akan dihapus. Tindakan ini tidak dapat dibatalkan." data-konfirmasi-judul="Hapus surat?" data-konfirmasi-tombol="Hapus" data-konfirmasi-gaya="bahaya">
                                     @csrf
                                     @method('delete')
                                     <button type="submit" title="Hapus" aria-label="Hapus surat {{ $surat->nomor_surat }}" class="{{ $aksi }} text-error">

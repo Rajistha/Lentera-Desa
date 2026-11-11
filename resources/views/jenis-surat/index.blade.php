@@ -47,7 +47,7 @@
                                         <x-ikon nama="ubah" :ukuran="16" />
                                     </a>
                                     <form action="{{ route('jenis-surat.destroy', $item) }}" method="post"
-                                          onsubmit="return confirm('Hapus jenis surat {{ e($item->nama) }}?')">
+                                          data-konfirmasi="Jenis surat {{ $item->nama }} akan dihapus beserta berkas templatnya." data-konfirmasi-judul="Hapus jenis surat?" data-konfirmasi-tombol="Hapus" data-konfirmasi-gaya="bahaya">
                                         @csrf
                                         @method('delete')
                                         <button type="submit" title="Hapus" aria-label="Hapus {{ $item->nama }}"

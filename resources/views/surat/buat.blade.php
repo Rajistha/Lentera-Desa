@@ -45,7 +45,7 @@
                 </x-kolom>
 
                 <x-kolom nama="tanggal_surat" label="Tanggal surat">
-                    <x-tanggal nama="tanggal_surat" :nilai="$surat->tanggal_surat?->toDateString() ?? now()->toDateString()" placeholder="Pilih tanggal surat" />
+                    <x-tanggal nama="tanggal_surat" :nilai="$surat->tanggal_surat?->toDateString() ?? now()->toDateString()" />
                 </x-kolom>
 
                 <x-kolom nama="keperluan" label="Keperluan" class="col-span-2">

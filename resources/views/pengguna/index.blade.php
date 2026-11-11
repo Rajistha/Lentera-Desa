@@ -49,7 +49,7 @@
                             </a>
                             @if ($item->id !== $saya)
                                 <form action="{{ route('pengguna.destroy', $item) }}" method="post"
-                                      onsubmit="return confirm('Hapus pengguna {{ e($item->name) }}?')">
+                                      data-konfirmasi="Akun {{ $item->name }} akan dihapus dan tidak dapat masuk lagi." data-konfirmasi-judul="Hapus pengguna?" data-konfirmasi-tombol="Hapus" data-konfirmasi-gaya="bahaya">
                                     @csrf
                                     @method('delete')
                                     <button type="submit" title="Hapus" aria-label="Hapus {{ $item->name }}"
@@ -90,12 +90,8 @@
                 </x-kolom>
 
                 <x-kolom nama="password" :label="$ubah ? 'Kata sandi baru' : 'Kata sandi'">
-                    <div class="relative">
-                        <x-ikon nama="kunci" :ukuran="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
-                        <input id="password" name="password" type="password" autocomplete="new-password"
-                               placeholder="{{ $ubah ? 'Kosongkan jika tidak diganti' : 'Minimal 8 karakter' }}"
-                               class="{{ $input('password') }} pl-11">
-                    </div>
+                    <x-sandi nama="password" autocomplete="new-password"
+                             :placeholder="$ubah ? 'Kosongkan jika tidak diganti' : 'Minimal 8 karakter'" />
                 </x-kolom>
 
                 <x-kolom nama="jabatan" label="Jabatan (opsional)" class="col-span-2">

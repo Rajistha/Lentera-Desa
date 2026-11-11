@@ -28,7 +28,7 @@
                 </x-kolom>
 
                 <x-kolom nama="tanggal_lahir" label="Tanggal lahir">
-                    <x-tanggal nama="tanggal_lahir" :nilai="$warga->tanggal_lahir?->toDateString()" :maks="now()->toDateString()" placeholder="Pilih tanggal lahir" />
+                    <x-tanggal nama="tanggal_lahir" :nilai="$warga->tanggal_lahir?->toDateString()" :maks="now()->toDateString()" :hari-ini="false" />
                 </x-kolom>
 
                 <x-kolom nama="jenis_kelamin" label="Jenis kelamin">

@@ -27,11 +27,8 @@
 
                 <div class="mt-4">
                     <label for="password" class="text-xs text-muted">Kata sandi</label>
-                    <div class="relative mt-1.5">
-                        <x-ikon nama="kunci" :ukuran="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
-                        <input id="password" name="password" type="password"
-                               autocomplete="current-password" required
-                               @class(['h-[38px] w-full rounded-full bg-surf pl-11 pr-4 text-[13px] outline-none', 'ring-1 ring-error' => $errors->has('password')])>
+                    <div class="mt-1.5">
+                        <x-sandi nama="password" required />
                     </div>
                     @error('password')
                         <p class="mt-1.5 flex items-center gap-1.5 text-[11px] text-error">

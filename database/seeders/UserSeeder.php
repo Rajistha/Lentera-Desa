@@ -9,7 +9,8 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $password = env('SEED_PASSWORD', 'password123');
+        // "?:" (bukan nilai bawaan env) agar SEED_PASSWORD yang dikosongkan tidak menghasilkan kata sandi kosong.
+        $password = env('SEED_PASSWORD') ?: 'password123';
 
         User::updateOrCreate(['username' => 'admin'], [
             'name' => 'Administrator',

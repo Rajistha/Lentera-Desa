@@ -110,12 +110,13 @@ function pilihan(root) {
 
 function kalender(root) {
     const nilai = root.querySelector('input[type="hidden"]');
-    const tombol = root.querySelector('[aria-haspopup="dialog"]');
-    const label = root.querySelector('[data-label]');
+    const teks = root.querySelector('[data-teks]');
+    const buka = root.querySelector('[data-buka]');
+    const pesan = root.querySelector('[data-pesan]');
     const panel = root.querySelector('[data-panel]');
     const maks = urai(root.dataset.maks);
     const min = urai(root.dataset.min);
-    const placeholder = label.dataset.placeholder || 'Pilih tanggal';
+    const tanpaHariIni = root.hasAttribute('data-tanpa-hari-ini');
 
     const sekarang = new Date();
     const hariIni = { y: sekarang.getFullYear(), m: sekarang.getMonth(), d: sekarang.getDate() };
@@ -126,29 +127,81 @@ function kalender(root) {
     const diluar = (t) => (maks && angka(t) > angka(maks)) || (min && angka(t) < angka(min));
     const bulanDiluar = (y, m) => (maks && (y > maks.y || (y === maks.y && m > maks.m))) || (min && (y < min.y || (y === min.y && m < min.m)));
     const tahunDiluar = (y) => (maks && y > maks.y) || (min && y < min.y);
+    const teksTanggal = (t) => `${pad(t.d)}-${pad(t.m + 1)}-${t.y}`;
 
-    const tampilkanLabel = () => {
+    const tampilkanPesan = (isi) => {
+        pesan.hidden = !isi;
+        pesan.querySelector('span').textContent = isi || '';
+    };
+
+    const tulisNilai = (iso) => {
+        if (nilai.value === iso) return;
+        nilai.value = iso;
+        nilai.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const sinkronTeks = () => {
         const t = urai(nilai.value);
-        label.textContent = t ? `${pad(t.d)} ${BULAN_PENDEK[t.m]} ${t.y}` : placeholder;
-        label.classList.toggle('text-muted', !t);
+        teks.value = t ? teksTanggal(t) : '';
     };
 
     const tutup = () => {
         panel.hidden = true;
-        tombol.setAttribute('aria-expanded', 'false');
+        buka.setAttribute('aria-expanded', 'false');
     };
 
     const pilih = (t) => {
-        nilai.value = iso(t.y, t.m, t.d);
-        tampilkanLabel();
-        nilai.dispatchEvent(new Event('change', { bubbles: true }));
+        tulisNilai(iso(t.y, t.m, t.d));
+        sinkronTeks();
+        tampilkanPesan('');
         tutup();
-        tombol.focus();
+        teks.focus();
     };
 
-    const tombolNav = (ikon, namaAria, aksi) => {
-        const b = el('button', 'flex size-8 items-center justify-center rounded-full text-muted hover:bg-hl hover:text-blue', null, { type: 'button', 'aria-label': namaAria });
+    /* --- mengetik langsung: 31051990, 31-05-1990, atau 31/05/1990 --- */
+
+    const periksaKetikan = ({ saatKeluar = false } = {}) => {
+        const digit = teks.value.replace(/\D/g, '').slice(0, 8);
+        const ditata = digit.slice(0, 2) + (digit.length > 2 ? '-' + digit.slice(2, 4) : '') + (digit.length > 4 ? '-' + digit.slice(4) : '');
+        if (teks.value !== ditata) teks.value = ditata;
+
+        if (digit.length === 0) {
+            tulisNilai('');
+            tampilkanPesan('');
+            return;
+        }
+        if (digit.length < 8) {
+            tulisNilai('');
+            tampilkanPesan(saatKeluar ? 'Tulis lengkap dengan format dd-mm-yyyy.' : '');
+            return;
+        }
+
+        const t = urai(`${digit.slice(4)}-${digit.slice(2, 4)}-${digit.slice(0, 2)}`);
+        if (!t || t.y < 1000) {
+            tulisNilai('');
+            tampilkanPesan('Tanggal tidak valid.');
+        } else if (maks && angka(t) > angka(maks)) {
+            tulisNilai('');
+            tampilkanPesan(maks.y === hariIni.y && maks.m === hariIni.m && maks.d === hariIni.d ? 'Tanggal tidak boleh melewati hari ini.' : `Tanggal tidak boleh setelah ${teksTanggal(maks)}.`);
+        } else if (min && angka(t) < angka(min)) {
+            tulisNilai('');
+            tampilkanPesan(`Tanggal tidak boleh sebelum ${teksTanggal(min)}.`);
+        } else {
+            tulisNilai(iso(t.y, t.m, t.d));
+            tampilkanPesan('');
+            if (!panel.hidden) {
+                tampil = { y: t.y, m: t.m };
+                render(iso(t.y, t.m, t.d));
+            }
+        }
+    };
+
+    /* --- tampilan kalender --- */
+
+    const tombolNav = (ikon, namaAria, aksi, nonaktif) => {
+        const b = el('button', 'flex size-8 items-center justify-center rounded-full text-muted hover:bg-hl hover:text-blue disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted', null, { type: 'button', 'aria-label': namaAria });
         b.innerHTML = ikon;
+        b.disabled = !!nonaktif;
         b.addEventListener('click', aksi);
         return b;
     };
@@ -173,10 +226,19 @@ function kalender(root) {
         const awalTahun = Math.floor(tampil.y / 12) * 12;
         const teksJudul = mode === 'hari' ? `${BULAN[tampil.m]} ${tampil.y}` : mode === 'bulan' ? String(tampil.y) : `${awalTahun} – ${awalTahun + 11}`;
 
+        // Panah dimatikan bila halaman berikut/sebelumnya seluruhnya di luar batas tanggal.
+        const indeks = tampil.y * 12 + tampil.m;
+        const tanpaSebelum = mode === 'hari' ? min && indeks <= min.y * 12 + min.m : mode === 'bulan' ? min && tampil.y <= min.y : min && awalTahun <= min.y;
+        const tanpaBerikut = mode === 'hari' ? maks && indeks >= maks.y * 12 + maks.m : mode === 'bulan' ? maks && tampil.y >= maks.y : maks && awalTahun + 11 >= maks.y;
+
         const kepala = el('div', 'mb-2 flex items-center justify-between');
         const judul = el('button', 'rounded-full px-3 py-1 text-[13px] font-bold hover:bg-hl', teksJudul, { type: 'button', 'aria-live': 'polite' });
         judul.addEventListener('click', () => { mode = mode === 'hari' ? 'tahun' : mode === 'bulan' ? 'tahun' : 'hari'; render(); });
-        kepala.append(tombolNav(IKON_KIRI, 'Sebelumnya', () => geser(-1)), judul, tombolNav(IKON_KANAN, 'Berikutnya', () => geser(1)));
+        kepala.append(
+            tombolNav(IKON_KIRI, 'Sebelumnya', () => geser(-1), tanpaSebelum),
+            judul,
+            tombolNav(IKON_KANAN, 'Berikutnya', () => geser(1), tanpaBerikut),
+        );
         panel.append(kepala);
 
         if (mode === 'tahun') {
@@ -238,18 +300,21 @@ function kalender(root) {
             }
             panel.append(g);
 
-            const kaki = el('div', 'mt-2 flex justify-end border-t border-line pt-2');
-            const hariIniBtn = el('button', 'rounded-full px-3 py-1 text-xs font-medium text-blue hover:bg-hl disabled:cursor-not-allowed disabled:text-muted/40 disabled:hover:bg-transparent', 'Hari ini', { type: 'button' });
-            hariIniBtn.disabled = !!diluar(hariIni);
-            hariIniBtn.addEventListener('click', () => { if (!diluar(hariIni)) pilih(hariIni); });
-            kaki.append(hariIniBtn);
-            panel.append(kaki);
+            // "Hari ini" tidak berguna untuk tanggal lahir, jadi disembunyikan di sana.
+            if (!tanpaHariIni) {
+                const kaki = el('div', 'mt-2 flex justify-end border-t border-line pt-2');
+                const hariIniBtn = el('button', 'rounded-full px-3 py-1 text-xs font-medium text-blue hover:bg-hl disabled:cursor-not-allowed disabled:text-muted/40 disabled:hover:bg-transparent', 'Hari ini', { type: 'button' });
+                hariIniBtn.disabled = !!diluar(hariIni);
+                hariIniBtn.addEventListener('click', () => { if (!diluar(hariIni)) pilih(hariIni); });
+                kaki.append(hariIniBtn);
+                panel.append(kaki);
+            }
         }
 
         if (fokus) panel.querySelector(`[data-tgl="${fokus}"]`)?.focus();
     }
 
-    const buka = () => {
+    const bukaPanel = () => {
         document.dispatchEvent(new CustomEvent('komponen-buka', { detail: root }));
         const terpilih = urai(nilai.value);
         // Tanpa nilai: mulai dari bulan ini, atau bulan terakhir yang diizinkan.
@@ -257,22 +322,115 @@ function kalender(root) {
         tampil = { y: acuan.y, m: acuan.m };
         mode = 'hari';
         panel.hidden = false;
-        tombol.setAttribute('aria-expanded', 'true');
+        buka.setAttribute('aria-expanded', 'true');
         render(terpilih ? iso(terpilih.y, terpilih.m, terpilih.d) : null);
     };
 
-    tombol.addEventListener('click', () => (panel.hidden ? buka() : tutup()));
+    buka.addEventListener('click', () => (panel.hidden ? bukaPanel() : tutup()));
+    teks.addEventListener('input', () => periksaKetikan());
+    teks.addEventListener('blur', () => periksaKetikan({ saatKeluar: true }));
+    teks.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' && panel.hidden) { e.preventDefault(); bukaPanel(); }
+    });
     root.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !panel.hidden) { e.stopPropagation(); tutup(); tombol.focus(); }
+        if (e.key === 'Escape' && !panel.hidden) { e.stopPropagation(); tutup(); teks.focus(); }
     });
 
-    tampilkanLabel();
+    sinkronTeks();
     pasangPenutup(root, tutup);
+}
+
+/* ---------- Modal konfirmasi (pengganti dialog konfirmasi bawaan peramban) ---------- */
+
+function modalKonfirmasi() {
+    const dlg = document.getElementById('modal-konfirmasi');
+    if (!dlg) return;
+
+    const judul = dlg.querySelector('[data-modal-judul]');
+    const isi = dlg.querySelector('[data-modal-isi]');
+    const ok = dlg.querySelector('[data-modal-ok]');
+    const batal = dlg.querySelector('[data-modal-batal]');
+    let tertunda = null;
+
+    const tutup = () => {
+        tertunda = null;
+        if (dlg.open) dlg.close();
+    };
+
+    // Form ber-atribut data-konfirmasi ditahan dulu; dikirim setelah pengguna menekan tombol konfirmasi.
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement) || !form.dataset.konfirmasi || form.dataset.terkonfirmasi) return;
+
+        e.preventDefault();
+        tertunda = form;
+        judul.textContent = form.dataset.konfirmasiJudul || 'Konfirmasi';
+        isi.textContent = form.dataset.konfirmasi;
+        ok.textContent = form.dataset.konfirmasiTombol || 'Lanjutkan';
+
+        const bahaya = form.dataset.konfirmasiGaya === 'bahaya';
+        ok.classList.toggle('bg-error', bahaya);
+        ok.classList.toggle('bg-blue', !bahaya);
+
+        dlg.showModal();
+        batal.focus(); // fokus awal di tombol yang aman
+    });
+
+    ok.addEventListener('click', () => {
+        const form = tertunda;
+        tutup();
+        if (form) {
+            form.dataset.terkonfirmasi = '1';
+            form.requestSubmit();
+        }
+    });
+    batal.addEventListener('click', tutup);
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) tutup(); }); // klik latar gelap
+    dlg.addEventListener('close', () => { tertunda = null; });
+}
+
+/* ---------- Tombol mata pada kolom kata sandi ---------- */
+
+function tombolSandi(tombol) {
+    const input = document.getElementById(tombol.dataset.toggleSandi);
+    const lihat = tombol.querySelector('[data-ikon-lihat]');
+    const sembunyi = tombol.querySelector('[data-ikon-sembunyi]');
+
+    tombol.addEventListener('click', () => {
+        const tampil = input.type === 'password';
+        input.type = tampil ? 'text' : 'password';
+        tombol.setAttribute('aria-pressed', String(tampil));
+        tombol.setAttribute('aria-label', tampil ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+        lihat.classList.toggle('hidden', tampil);
+        sembunyi.classList.toggle('hidden', !tampil);
+        input.focus();
+    });
+}
+
+/* ---------- Notifikasi status (toast) ---------- */
+
+function toast(el) {
+    const hapus = () => {
+        el.classList.add('opacity-0', 'translate-x-4');
+        setTimeout(() => el.remove(), 200);
+    };
+    el.querySelector('[data-toast-tutup]')?.addEventListener('click', hapus);
+
+    const ms = Number(el.dataset.otomatis);
+    if (ms > 0) {
+        let waktu = setTimeout(hapus, ms);
+        // Berhenti saat kursor di atasnya agar sempat dibaca.
+        el.addEventListener('mouseenter', () => clearTimeout(waktu));
+        el.addEventListener('mouseleave', () => { waktu = setTimeout(hapus, 2000); });
+    }
 }
 
 function mulai() {
     document.querySelectorAll('[data-pilihan]').forEach(pilihan);
     document.querySelectorAll('[data-kalender]').forEach(kalender);
+    document.querySelectorAll('[data-toggle-sandi]').forEach(tombolSandi);
+    document.querySelectorAll('[data-toast]').forEach(toast);
+    modalKonfirmasi();
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mulai);

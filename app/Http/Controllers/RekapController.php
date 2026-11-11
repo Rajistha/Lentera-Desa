@@ -20,9 +20,13 @@ class RekapController extends Controller
     {
         $sekarang = now();
 
-        $tahunTersedia = Surat::query()
-            ->selectRaw('YEAR(tanggal_surat) as tahun')->distinct()->pluck('tahun')
-            ->push($sekarang->year)->map(fn ($t) => (int) $t)->unique()->sortDesc()->values();
+        // Dari tahun surat tertua sampai terbaru (dan tahun berjalan); tanpa fungsi SQL khusus MySQL.
+        $tahunTersedia = collect([
+            $sekarang->year,
+            (int) substr((string) Surat::min('tanggal_surat'), 0, 4),
+            (int) substr((string) Surat::max('tanggal_surat'), 0, 4),
+        ])->filter();
+        $tahunTersedia = collect(range($tahunTersedia->min(), $tahunTersedia->max()))->sortDesc()->values();
 
         // Nilai di luar daftar (mis. URL diubah manual) kembali ke bulan/tahun berjalan.
         $bulan = (int) $request->query('bulan', $sekarang->month);
@@ -36,7 +40,8 @@ class RekapController extends Controller
 
         $awal = Carbon::create($tahun, $bulan, 1);
         $jumlah = Surat::query()
-            ->whereBetween('tanggal_surat', [$awal->toDateString(), $awal->copy()->endOfMonth()->toDateString()])
+            ->whereDate('tanggal_surat', '>=', $awal->toDateString())
+            ->whereDate('tanggal_surat', '<=', $awal->copy()->endOfMonth()->toDateString())
             ->selectRaw('jenis_surat_id, COUNT(*) as jumlah')
             ->groupBy('jenis_surat_id')
             ->pluck('jumlah', 'jenis_surat_id');
