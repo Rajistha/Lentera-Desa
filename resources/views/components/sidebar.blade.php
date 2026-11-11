@@ -8,7 +8,7 @@
         ]
         : [
             ['Dasbor', 'dasbor', 'dasbor', 'dasbor'],
-            ['Data Warga', 'dasbor', 'warga', 'warga*'],
+            ['Data Warga', 'warga.index', 'warga', 'warga*'],
             ['Buat Surat', 'dasbor', 'surat-baru', 'surat/buat'],
             ['Arsip Surat', 'dasbor', 'arsip', 'surat'],
             ['Rekap Layanan', 'dasbor', 'rekap', 'rekap*'],

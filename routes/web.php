@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HalamanController;
+use App\Http\Controllers\ImporWargaController;
+use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -18,6 +20,10 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('peran:operator')->group(function () {
         Route::get('/dasbor', [HalamanController::class, 'dasbor'])->name('dasbor');
+        Route::get('/warga/impor', [ImporWargaController::class, 'form'])->name('warga.impor');
+        Route::get('/warga/impor/templat', [ImporWargaController::class, 'templat'])->name('warga.impor.templat');
+        Route::post('/warga/impor', [ImporWargaController::class, 'proses'])->name('warga.impor.proses');
+        Route::resource('warga', WargaController::class)->except('show');
     });
 
     Route::middleware('peran:administrator')->group(function () {

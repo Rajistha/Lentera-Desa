@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Warga extends Model
 {
+    public const JENIS_KELAMIN = [
+        'L' => 'Laki-laki',
+        'P' => 'Perempuan',
+    ];
+
+    public const STATUS_PERKAWINAN = [
+        'belum_kawin' => 'Belum kawin',
+        'kawin' => 'Kawin',
+        'cerai_hidup' => 'Cerai hidup',
+        'cerai_mati' => 'Cerai mati',
+    ];
+
     protected $table = 'warga';
 
     protected $fillable = [
