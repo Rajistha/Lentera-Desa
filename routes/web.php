@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HalamanController;
 use App\Http\Controllers\ImporWargaController;
 use App\Http\Controllers\JenisSuratController;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\PratinjauTemplatController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\WargaController;
@@ -54,6 +55,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('jenis-surat', JenisSuratController::class)
             ->except(['show', 'create'])
             ->parameters(['jenis-surat' => 'jenisSurat']);
-        Route::get('/pengguna', [HalamanController::class, 'pengguna'])->name('pengguna.index');
+        Route::resource('pengguna', PenggunaController::class)->except(['show', 'create']);
     });
 });

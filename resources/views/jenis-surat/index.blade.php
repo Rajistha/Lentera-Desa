@@ -4,7 +4,6 @@
     $tampilForm = $ubah || request()->boolean('tambah') || $errors->any();
     $input = fn ($nama) => 'h-[38px] w-full rounded-full bg-surf px-4 text-[13px] outline-none placeholder:text-muted'
         .($errors->has($nama) ? ' ring-1 ring-error' : '');
-    $tab = 'flex h-9 items-center gap-2 rounded-full px-5 text-[13px] font-medium';
 @endphp
 
 <x-layout-aplikasi judul="Kelola Jenis Surat" subjudul="Daftar, tambah, dan ubah jenis surat beserta templat Word">
@@ -16,14 +15,7 @@
         </a>
     </x-slot:aksi>
 
-    <nav class="mb-5 flex items-center gap-3" aria-label="Kelola master">
-        <a href="{{ route('jenis-surat.index') }}" aria-current="page" class="{{ $tab }} bg-blue text-white">
-            <x-ikon nama="berkas" :ukuran="16" />Jenis Surat
-        </a>
-        <a href="{{ route('pengguna.index') }}" class="{{ $tab }} bg-surf hover:bg-line">
-            <x-ikon nama="pengguna" :ukuran="16" />Pengguna
-        </a>
-    </nav>
+    <x-tab-master aktif="jenis-surat" />
 
     <div class="flex items-start gap-5">
         <div class="min-w-0 flex-1">

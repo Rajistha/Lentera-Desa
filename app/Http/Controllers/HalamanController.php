@@ -17,12 +17,4 @@ class HalamanController extends Controller
             'subjudul' => 'Ringkasan layanan surat desa',
         ]);
     }
-
-    public function pengguna(): View
-    {
-        return view('halaman-sementara', [
-            'judul' => 'Kelola Pengguna',
-            'subjudul' => 'Halaman ini dikerjakan pada langkah 10',
-        ]);
-    }
 }
