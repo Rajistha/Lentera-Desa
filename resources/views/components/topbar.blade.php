@@ -1,6 +1,6 @@
 @php $pengguna = auth()->user(); @endphp
 
-<header class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-line bg-card px-8">
+<header class="sticky top-0 z-40 flex print:hidden h-16 shrink-0 items-center justify-between border-b border-line bg-card px-8">
     <div>
         @if ($pengguna->role === 'operator')
             <form action="{{ route('surat.index') }}" method="get" role="search"

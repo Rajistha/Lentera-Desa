@@ -19,6 +19,13 @@
     --color-error: #d64545;
 }
 
+@media print {
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
 @layer base {
     body {
         @apply bg-card font-sans text-[13px] text-ink antialiased;

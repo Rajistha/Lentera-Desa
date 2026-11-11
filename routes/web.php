@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\HalamanController;
+use App\Http\Controllers\DasborController;
 use App\Http\Controllers\ImporWargaController;
 use App\Http\Controllers\JenisSuratController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\PratinjauTemplatController;
+use App\Http\Controllers\RekapController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
@@ -23,7 +24,8 @@ Route::middleware('auth')->group(function () {
     ));
 
     Route::middleware('peran:operator')->group(function () {
-        Route::get('/dasbor', [HalamanController::class, 'dasbor'])->name('dasbor');
+        Route::get('/dasbor', [DasborController::class, 'index'])->name('dasbor');
+        Route::get('/rekap', [RekapController::class, 'index'])->name('rekap.index');
         Route::get('/warga/impor', [ImporWargaController::class, 'form'])->name('warga.impor');
         Route::get('/warga/impor/templat', [ImporWargaController::class, 'templat'])->name('warga.impor.templat');
         Route::post('/warga/impor', [ImporWargaController::class, 'proses'])->name('warga.impor.proses');

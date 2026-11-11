@@ -11,13 +11,13 @@
             ['Data Warga', 'warga.index', 'warga', 'warga*'],
             ['Buat Surat', 'surat.create', 'surat-baru', 'surat/buat'],
             ['Arsip Surat', 'surat.index', 'arsip', fn () => request()->is('surat') || (request()->is('surat/*') && ! request()->is('surat/buat'))],
-            ['Rekap Layanan', 'dasbor', 'rekap', 'rekap*'],
+            ['Rekap Layanan', 'rekap.index', 'rekap', 'rekap*'],
         ];
 
     $peran = $pengguna->role === 'administrator' ? 'Administrator' : 'Operator';
 @endphp
 
-<aside class="sticky top-0 flex h-screen w-60 shrink-0 flex-col self-start overflow-y-auto bg-side px-5 py-6">
+<aside class="sticky top-0 flex h-screen print:hidden w-60 shrink-0 flex-col self-start overflow-y-auto bg-side px-5 py-6">
     <a href="{{ url('/') }}" class="mb-6 flex items-center gap-3 px-1">
         <x-logo />
         <span class="text-lg font-bold text-blue">Lentera Desa</span>
