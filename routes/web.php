@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
             ->name('jenis-surat.pratinjau.unggahan');
         Route::get('/jenis-surat/pratinjau/{token}', [PratinjauTemplatController::class, 'tampil'])
             ->where('token', '[A-Za-z0-9]{32}')->name('jenis-surat.pratinjau.tampil');
+        Route::get('/jenis-surat/pratinjau/{token}/lihat', [PratinjauTemplatController::class, 'lihat'])
+            ->where('token', '[A-Za-z0-9]{32}')->name('jenis-surat.pratinjau.lihat');
         Route::get('/jenis-surat/pratinjau/{token}/pdf', [PratinjauTemplatController::class, 'pdf'])
             ->where('token', '[A-Za-z0-9]{32}')->name('jenis-surat.pratinjau.pdf');
         Route::resource('jenis-surat', JenisSuratController::class)

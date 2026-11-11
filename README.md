@@ -55,11 +55,11 @@ Tangkapan layar: simpan berkas PNG berukuran seragam di docs/img/, lalu hapus ta
 
 ### Administrator
 
-| Fitur              | Keterangan                                                                                                                           |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Kelola jenis surat | Tambah, ubah, dan hapus jenis surat beserta templat Word (`.docx`, maksimal 2 MB). Jenis yang sudah dipakai tidak dapat dihapus.     |
-| Pratinjau templat  | Lihat hasil templat dengan data contoh sebelum disimpan, termasuk daftar penanda (`${nama}`, `${nik}`, dan seterusnya).              |
-| Kelola pengguna    | Tambah, ubah, dan hapus akun operator atau administrator. Administrator tidak dapat menghapus atau menurunkan peran akunnya sendiri. |
+| Fitur              | Keterangan                                                                                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kelola jenis surat | Tambah, ubah, dan hapus jenis surat beserta templat Word (`.docx`, maksimal 2 MB). Jenis yang sudah dipakai tidak dapat dihapus.                                              |
+| Pratinjau templat  | Lihat hasil templat dengan data contoh sebelum disimpan, termasuk daftar penanda (`${nama}`, `${nik}`, dan seterusnya).                                                       |
+| Kelola pengguna    | Tambah, ubah, dan hapus akun operator atau administrator. Administrator tidak dapat menghapus atau menurunkan peran akunnya sendiri.                                          |
 | Profil desa        | Atur nama desa, kecamatan, kabupaten, alamat kantor, kode pos, telepon, nama kepala desa, dan kode desa untuk nomor surat. Datanya mengisi kop dan isi surat secara otomatis. |
 
 ## Cara Kerja
@@ -154,7 +154,7 @@ Data desa (dari menu **Profil Desa**):
 
 Label berkurung yang lazim pada templat buatan sendiri, yaitu `[NAMA DESA]`, `[NAMA KECAMATAN]`, `[NAMA KABUPATEN]`, `[Alamat Kantor Desa]`, `[xxxxx]` (kode pos), `[Nomor Telepon]`, dan `[Nama Terang Kepala Desa]`, juga diisi otomatis bila datanya sudah ada di Profil Desa; bila belum, labelnya dibiarkan sehingga terlihat perlu dilengkapi.
 
-Ketik tiap penanda sekaligus tanpa mengubah format di tengahnya. Penanda yang tidak dikenal dikosongkan (misalnya `{{ agama }}` bila datanya belum ada di aplikasi). Dengan LibreOffice terpasang, **Pratinjau** menampilkan PDF asli; tanpa itu, tampilan perkiraan. Gunakan **Pratinjau** pada halaman Kelola Jenis Surat untuk memeriksa hasilnya sebelum menyimpan.
+Ketik tiap penanda sekaligus tanpa mengubah format di tengahnya. Penanda yang tidak dikenal dikosongkan (misalnya `{{ golongan_darah }}`, karena datanya tidak ada di aplikasi). Dengan LibreOffice terpasang, **Pratinjau** menampilkan PDF asli; tanpa itu, tampilan perkiraan. Gunakan **Pratinjau** pada halaman Kelola Jenis Surat untuk memeriksa hasilnya sebelum menyimpan.
 
 ## Pengujian
 
@@ -201,6 +201,4 @@ Lalu ekstrak `berkas_YYYYMMDD_HHMMSS.zip` ke `storage/app`.
 | "Proses konversi LibreOffice berhenti dengan galat" | Lihat `storage/logs/laravel.log` (memuat kode keluar dan perintah yang dijalankan). Pastikan LibreOffice tidak sedang terbuka dengan jendela dialog dan folder `storage/framework` dapat ditulis. |
 | Halaman tampil tanpa gaya                           | Jalankan `npm run build`.                                                                                                                                                                         |
 | Galat basis data saat membuka halaman               | Pastikan MySQL menyala dan `DB_*` di `.env` benar, lalu `php artisan migrate`.                                                                                                                    |
-| Galat 500 setelah memperbarui kode                  | Jalankan `php artisan migrate` agar tabel baru terbuat, lalu `php artisan db:seed --class=ProfilDesaSeeder` bila profil desa belum ada.                                                            |
-
-<!-- Tambahkan nama dan NIM penulis di sini. -->
+| Galat 500 setelah memperbarui kode                  | Jalankan `php artisan migrate` agar tabel baru terbuat, lalu `php artisan db:seed --class=ProfilDesaSeeder` bila profil desa belum ada.                                                           |

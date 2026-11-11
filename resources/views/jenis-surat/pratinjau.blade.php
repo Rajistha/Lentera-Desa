@@ -12,7 +12,7 @@
     <x-slot:aksi>
         <div class="flex items-center gap-3">
             @if ($bisaPdf)
-                <a href="{{ route('jenis-surat.pratinjau.pdf', $token) }}" target="_blank" rel="noopener"
+                <a href="{{ route('jenis-surat.pratinjau.lihat', $token) }}" target="_blank" rel="noopener"
                    class="flex h-9 items-center gap-2 rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">
                     <x-ikon nama="berkas" :ukuran="16" />
                     Buka PDF di Tab Baru

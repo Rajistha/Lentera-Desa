@@ -191,6 +191,25 @@ class JenisSuratTest extends TestCase
             ->assertSee('Tata letak tidak dapat ditampilkan')->assertSee('Surat untuk Budi Santoso');
     }
 
+    public function test_tab_baru_membungkus_pdf_dengan_judul_dan_ikon_aplikasi(): void
+    {
+        $url = $this->bukaPratinjauSimpanan(JenisSurat::where('kode', 'SKD')->first());
+        $admin = $this->actingAs($this->admin());
+
+        // Tautan "Buka PDF di Tab Baru" mengarah ke pembungkus, bukan langsung ke berkas PDF.
+        $admin->get($url)->assertSee($url.'/lihat', false);
+
+        $admin->get($url.'/lihat')->assertOk()
+            ->assertSee('<title>Pratinjau Surat Keterangan Domisili — ', false)
+            ->assertSee('favicon.svg', false)
+            ->assertSee('src="'.$url.'/pdf?sematan=1"', false);
+
+        $admin->get('/jenis-surat/pratinjau/'.str_repeat('z', 32).'/lihat')->assertRedirect('/jenis-surat');
+
+        // Terakhir, karena actingAs() berlaku sampai tes selesai.
+        $this->actingAs($this->operator())->get($url.'/lihat')->assertForbidden();
+    }
+
     public function test_pdf_sematan_yang_gagal_menampilkan_pesan_singkat_bukan_mengalihkan(): void
     {
         $url = $this->bukaPratinjauSimpanan(JenisSurat::where('kode', 'SKD')->first());

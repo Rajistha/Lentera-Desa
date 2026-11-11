@@ -112,6 +112,18 @@ class PratinjauTemplatController extends Controller
         ]);
     }
 
+    /** Halaman pembungkus PDF untuk dibuka di tab baru (judul dan ikon tab mengikuti aplikasi). */
+    public function lihat(string $token): View|RedirectResponse
+    {
+        $info = $this->baca($token);
+        if (! $info) {
+            return redirect()->route('jenis-surat.index')
+                ->with('galat', 'Pratinjau sudah kedaluwarsa. Buka kembali dari formulir.');
+        }
+
+        return view('jenis-surat.pratinjau-tab', ['token' => $token, 'info' => $info]);
+    }
+
     public function pdf(Request $request, string $token, TemplatRenderer $renderer): BinaryFileResponse|RedirectResponse|Response
     {
         $info = $this->baca($token);
