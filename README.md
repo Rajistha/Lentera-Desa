@@ -94,6 +94,8 @@ XAMPP dan Laragon sudah memuat PHP dan MySQL yang memadai.
 
 ## Instalasi
 
+> Panduan lengkap (XAMPP, jaringan lokal, pencadangan, dan pemecahan masalah) ada di [INSTALASI.md](INSTALASI.md).
+
 ```bash
 # 1. Unduh proyek dan pasang dependensi
 git clone <alamat-repositori> lentera-desa

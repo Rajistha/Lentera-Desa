@@ -1,0 +1,16 @@
+# Proyek ini tidak boleh disajikan langsung oleh Apache dari folder akarnya: cara itu membuka .env
+# (kunci aplikasi dan kata sandi basis data), log, kode sumber, dan PDF surat kepada siapa pun di jaringan.
+#
+# Jalankan aplikasi lewat `php artisan serve`, atau arahkan DocumentRoot Apache ke folder "public"
+# (lihat README). Pada pemasangan dengan DocumentRoot = public, berkas ini berada di luar
+# folder yang disajikan sehingga tidak berpengaruh.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+
+Options -Indexes
