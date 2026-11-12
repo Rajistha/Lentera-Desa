@@ -48,9 +48,10 @@ Thumbs.db
 # Referensi desain UI (gambar mockup) disimpan lokal
 /UI Lentera Desa/
 
-# Dokumen perencanaan disimpan lokal; hanya README.md yang dipublikasikan
+# Dokumen perencanaan disimpan lokal; hanya README.md dan INSTALASI.md yang dipublikasikan
 *.md
 !README.md
+!INSTALASI.md
 /docs/*
 !/docs/img/
 
