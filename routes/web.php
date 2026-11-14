@@ -57,6 +57,8 @@ Route::middleware('auth')->group(function () {
             ->where('token', '[A-Za-z0-9]{32}')->name('jenis-surat.pratinjau.lihat');
         Route::get('/jenis-surat/pratinjau/{token}/pdf', [PratinjauTemplatController::class, 'pdf'])
             ->where('token', '[A-Za-z0-9]{32}')->name('jenis-surat.pratinjau.pdf');
+        Route::post('/jenis-surat/{jenisSurat}/bawaan', [JenisSuratController::class, 'kembalikan'])
+            ->name('jenis-surat.bawaan');
         Route::resource('jenis-surat', JenisSuratController::class)
             ->except(['show', 'create'])
             ->parameters(['jenis-surat' => 'jenisSurat']);

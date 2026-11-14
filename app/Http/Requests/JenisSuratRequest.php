@@ -20,8 +20,6 @@ class JenisSuratRequest extends FormRequest
 
     public function rules(): array
     {
-        $ubah = $this->route('jenisSurat') !== null;
-
         return [
             // Kode dipakai di nomor surat dan nama berkas, jadi dibatasi huruf/angka.
             'kode' => [
@@ -32,7 +30,7 @@ class JenisSuratRequest extends FormRequest
             'deskripsi' => ['nullable', 'string', 'max:255'],
             'berkas' => [
                 'bail',
-                $ubah ? 'nullable' : 'required',
+                'nullable',
                 'file', 'extensions:docx', 'max:2048',
                 new DokumenWord,
             ],
@@ -46,7 +44,6 @@ class JenisSuratRequest extends FormRequest
             'max' => ':attribute maksimal :max karakter.',
             'kode.regex' => 'Kode hanya boleh berisi huruf dan angka tanpa spasi.',
             'kode.unique' => 'Kode sudah dipakai jenis surat lain.',
-            'berkas.required' => 'Templat (.docx) wajib diunggah.',
             'berkas.file' => 'Berkas gagal diunggah.',
             'berkas.extensions' => 'Templat harus berekstensi .docx.',
             'berkas.max' => 'Ukuran templat maksimal 2 MB.',

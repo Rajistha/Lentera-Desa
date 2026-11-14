@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\JenisSuratRequest;
 use App\Models\JenisSurat;
+use App\Services\TemplatBawaan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -25,7 +26,12 @@ class JenisSuratController extends Controller
         $data = $request->validated();
         $path = $this->pathTemplat($data['kode']);
 
-        Storage::disk('local')->putFileAs('templat', $request->file('berkas'), basename($path));
+        if ($request->hasFile('berkas')) {
+            Storage::disk('local')->putFileAs('templat', $request->file('berkas'), basename($path));
+        } else {
+            Storage::disk('local')->makeDirectory('templat');
+            TemplatBawaan::tulis($data['kode'], Storage::disk('local')->path($path), $data['nama']);
+        }
 
         JenisSurat::create([
             'kode' => $data['kode'],
@@ -63,6 +69,17 @@ class JenisSuratController extends Controller
         ]);
 
         return redirect()->route('jenis-surat.index')->with('sukses', 'Jenis surat berhasil diperbarui.');
+    }
+
+    public function kembalikan(JenisSurat $jenisSurat): RedirectResponse
+    {
+        $disk = Storage::disk('local');
+        $disk->makeDirectory('templat');
+
+        TemplatBawaan::tulis($jenisSurat->kode, $disk->path($jenisSurat->templat), $jenisSurat->nama);
+
+        return redirect()->route('jenis-surat.edit', $jenisSurat)
+            ->with('sukses', 'Templat dikembalikan ke bawaan.');
     }
 
     public function destroy(JenisSurat $jenisSurat): RedirectResponse

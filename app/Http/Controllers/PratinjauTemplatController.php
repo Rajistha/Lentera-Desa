@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JenisSurat;
 use App\Rules\DokumenWord;
 use App\Services\PdfGagal;
+use App\Services\TemplatBawaan;
 use App\Services\TemplatRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,7 +74,18 @@ class PratinjauTemplatController extends Controller
             return $this->pratinjauSimpanan($jenis, 'formulir');
         }
 
-        return back()->with('galat', 'Pilih berkas templat (.docx) untuk dipratinjau.');
+        // Jenis baru tanpa unggahan: pratinjau templat bawaan umum.
+        $kode = strtoupper(trim((string) $request->input('kode'))) ?: 'XXX';
+        $nama = trim((string) $request->input('nama')) ?: 'Jenis surat baru';
+        $sementara = tempnam(sys_get_temp_dir(), 'bawaan-');
+
+        try {
+            TemplatBawaan::tulis($kode, $sementara, $nama);
+
+            return $this->buatToken($sementara, $kode, $nama, 'templat bawaan', null, 'formulir');
+        } finally {
+            File::delete($sementara);
+        }
     }
 
     public function tampil(string $token, TemplatRenderer $renderer): View|RedirectResponse

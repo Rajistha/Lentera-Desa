@@ -44,10 +44,13 @@ class JenisSuratTest extends TestCase
         Storage::disk('local')->assertExists('templat/skl.docx');
     }
 
-    public function test_templat_wajib_saat_menambah(): void
+    public function test_menambah_tanpa_templat_memakai_templat_bawaan(): void
     {
-        $this->simpan(['kode' => 'SKL', 'nama' => 'Uji'])->assertSessionHasErrors(['berkas' => 'Templat (.docx) wajib diunggah.']);
-        $this->assertDatabaseMissing('jenis_surat', ['kode' => 'SKL']);
+        $this->simpan(['kode' => 'SKAW', 'nama' => 'Surat Keterangan Ahli Waris'])
+            ->assertRedirect('/jenis-surat')->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('jenis_surat', ['kode' => 'SKAW', 'templat' => 'templat/skaw.docx']);
+        Storage::disk('local')->assertExists('templat/skaw.docx');
     }
 
     public function test_berkas_bukan_docx_asli_ditolak_dan_tidak_tersimpan(): void

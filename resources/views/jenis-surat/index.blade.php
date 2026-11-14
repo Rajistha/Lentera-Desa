@@ -92,7 +92,7 @@
                               class="w-full rounded-xl bg-surf px-4 py-3 text-[13px] outline-none placeholder:text-muted {{ $errors->has('deskripsi') ? 'ring-1 ring-error' : '' }}">{{ old('deskripsi', $jenis->deskripsi) }}</textarea>
                 </x-kolom>
 
-                <x-kolom nama="berkas" :label="$ubah ? 'Unggah templat (.docx)' : 'Unggah templat (.docx), wajib'" class="col-span-2">
+                <x-kolom nama="berkas" label="Unggah templat (.docx), opsional" class="col-span-2">
                     <div @class(['relative flex flex-col items-center gap-1.5 rounded-2xl border-2 border-dashed px-6 py-7 text-center hover:bg-side',
                                  'border-line' => ! $errors->has('berkas'), 'border-error' => $errors->has('berkas')])>
                         <x-ikon nama="unggah" :ukuran="24" class="text-blue" />
@@ -101,7 +101,7 @@
                         <input id="berkas" name="berkas" type="file" aria-label="Berkas templat"
                                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                class="absolute inset-0 size-full cursor-pointer opacity-0"
-                               onchange="const n = document.getElementById('berkas-dipilih'); n.textContent = this.files[0] ? this.files[0].name + ' · dipilih' : ''; n.classList.toggle('hidden', ! this.files.length)">
+                               onchange="const n = document.getElementById('berkas-dipilih'); const f = this.files[0]; const besar = f && f.size > 2 * 1024 * 1024; if (besar) { this.value = ''; } n.textContent = besar ? 'Ukuran templat maksimal 2 MB, ' + f.name + ' terlalu besar.' : (f ? f.name + ' · dipilih' : ''); n.classList.toggle('hidden', ! f); n.classList.toggle('bg-hl', ! besar); n.classList.toggle('text-blue', ! besar); n.classList.toggle('bg-error/10', !! besar); n.classList.toggle('text-error', !! besar)">
                     </div>
                 </x-kolom>
             </div>
@@ -121,6 +121,8 @@
                     @endif
                 </p>
                 <p class="mt-2 text-[11px] text-muted">Kosongkan unggahan jika tidak ingin mengganti templat</p>
+            @else
+                <p class="mt-3 text-[11px] text-muted">Tanpa unggahan, jenis surat memakai templat bawaan.</p>
             @endif
 
             <details class="mt-3 text-[13px]">
@@ -150,7 +152,17 @@
                 <a href="{{ route('jenis-surat.index') }}"
                    class="flex h-9 items-center rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">Batal</a>
             </div>
+            @if ($ubah)
+                <button type="submit" form="form-bawaan"
+                        class="mt-3 text-xs font-medium text-blue hover:underline">Kembalikan templat ke bawaan</button>
+            @endif
         </form>
+        @if ($ubah)
+            <form id="form-bawaan" action="{{ route('jenis-surat.bawaan', $jenis) }}" method="post"
+                  data-konfirmasi="Templat {{ $jenis->nama }} yang Anda unggah akan diganti dengan templat bawaan." data-konfirmasi-judul="Kembalikan ke bawaan?" data-konfirmasi-tombol="Kembalikan">
+                @csrf
+            </form>
+        @endif
         @endif
     </div>
 </x-layout-aplikasi>
