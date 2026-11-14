@@ -6,7 +6,7 @@
         .($errors->has($nama) ? ' ring-1 ring-error' : '');
 @endphp
 
-<x-layout-aplikasi judul="Kelola Jenis Surat" subjudul="Daftar, tambah, dan ubah jenis surat beserta templat Word">
+<x-layout-aplikasi judul="Kelola Jenis Surat" subjudul="Daftar, tambah, dan ubah jenis surat beserta template Word">
     <x-slot:aksi>
         <a href="{{ route('jenis-surat.index', ['tambah' => 1]) }}#formulir"
            class="flex h-9 items-center gap-2 rounded-full bg-blue px-5 text-[13px] font-medium text-white hover:bg-blue/90">
@@ -24,7 +24,7 @@
                     <tr class="h-10 bg-surf text-[11px] uppercase tracking-[0.8px] text-muted">
                         <th class="px-3 font-medium">Kode</th>
                         <th class="px-3 font-medium">Nama</th>
-                        <th class="px-3 font-medium">Templat</th>
+                        <th class="px-3 font-medium">Template</th>
                         <th class="px-3 font-medium">Aksi</th>
                     </tr>
                 </thead>
@@ -47,7 +47,7 @@
                                         <x-ikon nama="ubah" :ukuran="16" />
                                     </a>
                                     <form action="{{ route('jenis-surat.destroy', $item) }}" method="post"
-                                          data-konfirmasi="Jenis surat {{ $item->nama }} akan dihapus beserta berkas templatnya." data-konfirmasi-judul="Hapus jenis surat?" data-konfirmasi-tombol="Hapus" data-konfirmasi-gaya="bahaya">
+                                          data-konfirmasi="Jenis surat {{ $item->nama }} akan dihapus beserta berkas template-nya." data-konfirmasi-judul="Hapus jenis surat?" data-konfirmasi-tombol="Hapus" data-konfirmasi-gaya="bahaya">
                                         @csrf
                                         @method('delete')
                                         <button type="submit" title="Hapus" aria-label="Hapus {{ $item->nama }}"
@@ -92,16 +92,16 @@
                               class="w-full rounded-xl bg-surf px-4 py-3 text-[13px] outline-none placeholder:text-muted {{ $errors->has('deskripsi') ? 'ring-1 ring-error' : '' }}">{{ old('deskripsi', $jenis->deskripsi) }}</textarea>
                 </x-kolom>
 
-                <x-kolom nama="berkas" label="Unggah templat (.docx), opsional" class="col-span-2">
+                <x-kolom nama="berkas" label="Unggah template (.docx), opsional" class="col-span-2">
                     <div @class(['relative flex flex-col items-center gap-1.5 rounded-2xl border-2 border-dashed px-6 py-7 text-center hover:bg-side',
                                  'border-line' => ! $errors->has('berkas'), 'border-error' => $errors->has('berkas')])>
                         <x-ikon nama="unggah" :ukuran="24" class="text-blue" />
                         <span class="font-medium">Tarik berkas atau klik untuk unggah</span>
                         <span class="text-xs text-muted">Format .docx, maksimal 2 MB</span>
-                        <input id="berkas" name="berkas" type="file" aria-label="Berkas templat"
+                        <input id="berkas" name="berkas" type="file" aria-label="Berkas template"
                                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                class="absolute inset-0 size-full cursor-pointer opacity-0"
-                               onchange="const n = document.getElementById('berkas-dipilih'); const f = this.files[0]; const besar = f && f.size > 2 * 1024 * 1024; if (besar) { this.value = ''; } n.textContent = besar ? 'Ukuran templat maksimal 2 MB, ' + f.name + ' terlalu besar.' : (f ? f.name + ' · dipilih' : ''); n.classList.toggle('hidden', ! f); n.classList.toggle('bg-hl', ! besar); n.classList.toggle('text-blue', ! besar); n.classList.toggle('bg-error/10', !! besar); n.classList.toggle('text-error', !! besar)">
+                               onchange="const n = document.getElementById('berkas-dipilih'); const f = this.files[0]; const besar = f && f.size > 2 * 1024 * 1024; if (besar) { this.value = ''; } n.textContent = besar ? 'Ukuran template maksimal 2 MB, ' + f.name + ' terlalu besar.' : (f ? f.name + ' · dipilih' : ''); n.classList.toggle('hidden', ! f); n.classList.toggle('bg-hl', ! besar); n.classList.toggle('text-blue', ! besar); n.classList.toggle('bg-error/10', !! besar); n.classList.toggle('text-error', !! besar)">
                     </div>
                 </x-kolom>
             </div>
@@ -120,9 +120,9 @@
                         <span class="font-medium text-error">Berkas hilang</span>
                     @endif
                 </p>
-                <p class="mt-2 text-[11px] text-muted">Kosongkan unggahan jika tidak ingin mengganti templat</p>
+                <p class="mt-2 text-[11px] text-muted">Kosongkan unggahan jika tidak ingin mengganti template</p>
             @else
-                <p class="mt-3 text-[11px] text-muted">Tanpa unggahan, jenis surat memakai templat bawaan.</p>
+                <p class="mt-3 text-[11px] text-muted">Tanpa unggahan, jenis surat memakai template bawaan.</p>
             @endif
 
             <details class="mt-3 text-[13px]">
@@ -154,12 +154,12 @@
             </div>
             @if ($ubah)
                 <button type="submit" form="form-bawaan"
-                        class="mt-3 text-xs font-medium text-blue hover:underline">Kembalikan templat ke bawaan</button>
+                        class="mt-3 text-xs font-medium text-blue hover:underline">Kembalikan template ke bawaan</button>
             @endif
         </form>
         @if ($ubah)
             <form id="form-bawaan" action="{{ route('jenis-surat.bawaan', $jenis) }}" method="post"
-                  data-konfirmasi="Templat {{ $jenis->nama }} yang Anda unggah akan diganti dengan templat bawaan." data-konfirmasi-judul="Kembalikan ke bawaan?" data-konfirmasi-tombol="Kembalikan">
+                  data-konfirmasi="Template {{ $jenis->nama }} yang Anda unggah akan diganti dengan template bawaan." data-konfirmasi-judul="Kembalikan ke bawaan?" data-konfirmasi-tombol="Kembalikan">
                 @csrf
             </form>
         @endif

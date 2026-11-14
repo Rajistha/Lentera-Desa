@@ -181,7 +181,7 @@ class ImporWarga
         $harus = array_map('mb_strtolower', array_keys(self::KOLOM));
 
         if ($dibaca !== $harus) {
-            throw new InvalidArgumentException('Judul kolom tidak sesuai templat. Unduh templat terbaru dan salin data ke dalamnya.');
+            throw new InvalidArgumentException('Judul kolom tidak sesuai template. Unduh template terbaru dan salin data ke dalamnya.');
         }
     }
 

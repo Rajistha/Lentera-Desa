@@ -79,7 +79,7 @@ class JenisSuratController extends Controller
         TemplatBawaan::tulis($jenisSurat->kode, $disk->path($jenisSurat->templat), $jenisSurat->nama);
 
         return redirect()->route('jenis-surat.edit', $jenisSurat)
-            ->with('sukses', 'Templat dikembalikan ke bawaan.');
+            ->with('sukses', 'Template dikembalikan ke bawaan.');
     }
 
     public function destroy(JenisSurat $jenisSurat): RedirectResponse

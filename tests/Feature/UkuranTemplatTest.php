@@ -17,6 +17,6 @@ class UkuranTemplatTest extends TestCase
 
         $this->actingAs($this->admin())->from('/jenis-surat?tambah=1')
             ->post('/jenis-surat', ['kode' => 'BSR', 'nama' => 'Uji', 'berkas' => $besar])
-            ->assertSessionHasErrors(['berkas' => 'Ukuran templat maksimal 2 MB.']);
+            ->assertSessionHasErrors(['berkas' => 'Ukuran template maksimal 2 MB.']);
     }
 }

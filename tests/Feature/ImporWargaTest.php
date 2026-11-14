@@ -109,7 +109,7 @@ class ImporWargaTest extends TestCase
     public function test_judul_kolom_harus_sesuai_templat(): void
     {
         $this->impor($this->xlsx([$this->baris('3573010101900001')], ['NIK', 'Nama']))
-            ->assertSessionHasErrors(['berkas' => 'Judul kolom tidak sesuai templat. Unduh templat terbaru dan salin data ke dalamnya.']);
+            ->assertSessionHasErrors(['berkas' => 'Judul kolom tidak sesuai template. Unduh template terbaru dan salin data ke dalamnya.']);
         $this->assertDatabaseCount('warga', 0);
     }
 
@@ -144,7 +144,7 @@ class ImporWargaTest extends TestCase
     public function test_templat_dapat_diunduh_dan_hanya_berisi_judul_kolom(): void
     {
         $respons = $this->actingAs($this->operator())->get('/warga/impor/templat');
-        $respons->assertOk()->assertDownload('templat-impor-warga.xlsx');
+        $respons->assertOk()->assertDownload('template-impor-warga.xlsx');
 
         // Templat kosong tidak boleh terimpor sebagai data (tanpa baris contoh).
         $this->impor(new UploadedFile($respons->baseResponse->getFile()->getPathname(), 'templat.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true))

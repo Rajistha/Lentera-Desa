@@ -59,8 +59,8 @@ class JenisSuratTest extends TestCase
             'teks berekstensi docx' => [UploadedFile::fake()->createWithContent('a.docx', 'bukan zip'), 'Berkas bukan dokumen Word (.docx) yang valid.'],
             'zip tanpa document.xml' => [$this->berkasZip(['x.txt' => 'a']), 'Berkas bukan dokumen Word (.docx) yang valid.'],
             'berisi makro vba' => [$this->berkasZip(['word/document.xml' => '<w/>', 'word/vbaProject.bin' => 'x']), 'Berkas bukan dokumen Word (.docx) yang valid.'],
-            'ekstensi pdf' => [UploadedFile::fake()->create('a.pdf', 10), 'Templat harus berekstensi .docx.'],
-            'lebih dari 2 MB' => [UploadedFile::fake()->create('besar.docx', 2049), 'Ukuran templat maksimal 2 MB.'],
+            'ekstensi pdf' => [UploadedFile::fake()->create('a.pdf', 10), 'Template harus berekstensi .docx.'],
+            'lebih dari 2 MB' => [UploadedFile::fake()->create('besar.docx', 2049), 'Ukuran template maksimal 2 MB.'],
         ];
 
         foreach ($kasus as [$berkas, $pesan]) {
@@ -135,7 +135,7 @@ class JenisSuratTest extends TestCase
         $respons->assertRedirect();
 
         $this->actingAs($admin)->get($respons->headers->get('Location'))
-            ->assertOk()->assertSee('Pratinjau Templat')->assertSee('Budi Santoso')
+            ->assertOk()->assertSee('Pratinjau Template')->assertSee('Budi Santoso')
             ->assertSee('3573010101900001')->assertSee('sandbox=""', false);
     }
 

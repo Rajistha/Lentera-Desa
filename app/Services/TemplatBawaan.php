@@ -59,11 +59,11 @@ class TemplatBawaan
         $kanan = ['alignment' => 'right'];
 
         // Kop surat
-        $bagian->addText('PEMERINTAH ${nama_kabupaten}', ['bold' => true, 'size' => 11], $tengah);
-        $bagian->addText('KECAMATAN ${nama_kecamatan}', ['bold' => true, 'size' => 11], $tengah);
-        $bagian->addText('DESA/KELURAHAN ${nama_desa}', ['bold' => true, 'size' => 14], $tengah);
-        $bagian->addText('Alamat: ${alamat_kantor_desa}, Kode Pos ${kode_pos} |', ['italic' => true, 'size' => 7], $tengah);
-        $bagian->addText('Telp: ${telepon_desa}', ['italic' => true, 'size' => 7], [
+        $bagian->addText('PEMERINTAH ${nama_kabupaten}', ['bold' => true, 'allCaps' => true, 'size' => 11], $tengah);
+        $bagian->addText('KECAMATAN ${nama_kecamatan}', ['bold' => true, 'allCaps' => true, 'size' => 11], $tengah);
+        $bagian->addText('DESA/KELURAHAN ${nama_desa}', ['bold' => true, 'allCaps' => true, 'size' => 14], $tengah);
+        $bagian->addText('Alamat: ${alamat_kantor_desa}, Kode Pos ${kode_pos} |', ['italic' => true, 'allCaps' => true, 'size' => 7], $tengah);
+        $bagian->addText('Telp: ${telepon_desa}', ['italic' => true, 'allCaps' => true, 'size' => 7], [
             'alignment' => 'center', 'spaceAfter' => 60,
             'borderBottomSize' => 12, 'borderBottomColor' => '000000', 'borderBottomStyle' => 'single',
         ]);
@@ -111,7 +111,6 @@ class TemplatBawaan
         $bagian->addText('${nama_desa}, ${tanggal_surat}', [], $kanan);
         $bagian->addText('Kepala Desa/Lurah ${nama_desa},', [], $kanan);
         $bagian->addTextBreak(3);
-        $bagian->addText('(                                                  )', [], $kanan);
         $bagian->addText('${nama_kepala_desa}', ['size' => 8], $kanan);
 
         IOFactory::createWriter($word, 'Word2007')->save($berkas);

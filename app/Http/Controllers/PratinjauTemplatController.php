@@ -36,7 +36,7 @@ class PratinjauTemplatController extends Controller
         $disk = Storage::disk('local');
 
         if (! $disk->exists($jenisSurat->templat)) {
-            return back()->with('galat', 'Berkas templat tidak ditemukan. Unggah ulang templatnya.');
+            return back()->with('galat', 'Berkas template tidak ditemukan. Unggah ulang template-nya.');
         }
 
         return $this->buatToken(
@@ -56,8 +56,8 @@ class PratinjauTemplatController extends Controller
             'berkas' => ['nullable', 'bail', 'file', 'extensions:docx', 'max:2048', new DokumenWord],
         ], [
             'berkas.file' => 'Berkas gagal diunggah.',
-            'berkas.extensions' => 'Templat harus berekstensi .docx.',
-            'berkas.max' => 'Ukuran templat maksimal 2 MB.',
+            'berkas.extensions' => 'Template harus berekstensi .docx.',
+            'berkas.max' => 'Ukuran template maksimal 2 MB.',
         ]);
 
         $jenis = JenisSurat::find($request->input('jenis_id'));
@@ -82,7 +82,7 @@ class PratinjauTemplatController extends Controller
         try {
             TemplatBawaan::tulis($kode, $sementara, $nama);
 
-            return $this->buatToken($sementara, $kode, $nama, 'templat bawaan', null, 'formulir');
+            return $this->buatToken($sementara, $kode, $nama, 'template bawaan', null, 'formulir');
         } finally {
             File::delete($sementara);
         }
@@ -165,7 +165,7 @@ class PratinjauTemplatController extends Controller
         }
 
         return response()
-            ->file($kirim, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline; filename="pratinjau-templat.pdf"'])
+            ->file($kirim, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline; filename="pratinjau-template.pdf"'])
             ->deleteFileAfterSend();
     }
 

@@ -23,7 +23,7 @@ class ImporWargaController extends Controller
         $impor->buatTemplat($path);
 
         return response()
-            ->download($path, 'templat-impor-warga.xlsx')
+            ->download($path, 'template-impor-warga.xlsx')
             ->deleteFileAfterSend();
     }
 

@@ -76,9 +76,9 @@
         <aside class="w-[340px] shrink-0 rounded-[18px] border border-line bg-card p-6">
             <h2 class="flex items-center gap-2 text-[15px] font-bold">
                 <x-ikon nama="info" :ukuran="16" class="text-blue" />
-                Dipakai pada templat surat
+                Dipakai pada template surat
             </h2>
-            <p class="mt-3 text-xs text-muted">Tulis penanda berikut di templat Word, dengan kurung dolar atau kurung kurawal ganda:</p>
+            <p class="mt-3 text-xs text-muted">Tulis penanda berikut di template Word, dengan kurung dolar atau kurung kurawal ganda:</p>
             <ul class="mt-3 space-y-2">
                 @foreach ($pemakaian as $label => $penanda)
                     <li class="flex items-center justify-between gap-3">
@@ -88,7 +88,7 @@
                 @endforeach
             </ul>
             <p class="mt-4 text-xs text-muted">
-                Label berkurung seperti [NAMA DESA], [NAMA KECAMATAN], [Alamat Kantor Desa], dan [Nomor Telepon] pada templat
+                Label berkurung seperti [NAMA DESA], [NAMA KECAMATAN], [Alamat Kantor Desa], dan [Nomor Telepon] pada template
                 juga diisi otomatis bila datanya sudah diisi di sini.
             </p>
         </aside>

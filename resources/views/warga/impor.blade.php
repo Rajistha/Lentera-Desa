@@ -54,10 +54,10 @@
             <a href="{{ route('warga.impor.templat') }}"
                class="mt-1.5 inline-flex h-9 items-center gap-2 rounded-full bg-surf px-5 text-[13px] font-medium hover:bg-line">
                 <x-ikon nama="unduh" :ukuran="16" />
-                Unduh Templat Excel
+                Unduh Template Excel
             </a>
 
-            <p class="mt-6 text-xs text-muted">Langkah 2: isi templat, lalu unggah</p>
+            <p class="mt-6 text-xs text-muted">Langkah 2: isi template, lalu unggah</p>
             <label for="berkas"
                    @class(['mt-1.5 flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-6 py-10 text-center hover:bg-side',
                            'border-line' => ! $errors->has('berkas'), 'border-error' => $errors->has('berkas')])>
@@ -92,7 +92,7 @@
                 Catatan Impor
             </h2>
             <ul class="mt-4 space-y-3">
-                @foreach (['Tiap baris divalidasi seperti formulir warga', 'NIK 16 digit, unik di basis data dan di dalam berkas', 'Ketik NIK sebagai teks (kolom NIK di templat sudah berformat teks)', 'Baris yang valid disimpan, baris yang gagal dilewati dan dilaporkan'] as $catatan)
+                @foreach (['Tiap baris divalidasi seperti formulir warga', 'NIK 16 digit, unik di basis data dan di dalam berkas', 'Ketik NIK sebagai teks (kolom NIK di template sudah berformat teks)', 'Baris yang valid disimpan, baris yang gagal dilewati dan dilaporkan'] as $catatan)
                     <li class="flex items-start gap-2.5">
                         <x-ikon nama="cek" :ukuran="16" class="mt-px text-blue" />
                         {{ $catatan }}

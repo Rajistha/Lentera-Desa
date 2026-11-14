@@ -116,7 +116,7 @@ class LayananSurat
         }
 
         if (! $disk->exists($surat->jenisSurat->templat)) {
-            return 'Berkas templat jenis surat tidak ditemukan. Hubungi administrator.';
+            return 'Berkas template jenis surat tidak ditemukan. Hubungi administrator.';
         }
 
         $relatif = 'surat/'.$surat->tahun.'/'.str_replace('/', '-', $surat->nomor_surat).'.pdf';
@@ -126,9 +126,9 @@ class LayananSurat
         } catch (PdfGagal $e) {
             return $e->getMessage();
         } catch (\Throwable $e) {
-            Log::error('Pengisian templat gagal', ['surat' => $surat->id, 'galat' => $e->getMessage()]);
+            Log::error('Pengisian template gagal', ['surat' => $surat->id, 'galat' => $e->getMessage()]);
 
-            return 'PDF gagal dibuat karena templat tidak dapat diproses. Hubungi administrator.';
+            return 'PDF gagal dibuat karena template tidak dapat diproses. Hubungi administrator.';
         }
 
         $surat->update(['berkas_pdf' => $relatif]);

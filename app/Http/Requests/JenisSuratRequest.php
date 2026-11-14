@@ -45,8 +45,8 @@ class JenisSuratRequest extends FormRequest
             'kode.regex' => 'Kode hanya boleh berisi huruf dan angka tanpa spasi.',
             'kode.unique' => 'Kode sudah dipakai jenis surat lain.',
             'berkas.file' => 'Berkas gagal diunggah.',
-            'berkas.extensions' => 'Templat harus berekstensi .docx.',
-            'berkas.max' => 'Ukuran templat maksimal 2 MB.',
+            'berkas.extensions' => 'Template harus berekstensi .docx.',
+            'berkas.max' => 'Ukuran template maksimal 2 MB.',
         ];
     }
 

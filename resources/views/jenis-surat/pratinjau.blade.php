@@ -8,7 +8,7 @@
     };
 @endphp
 
-<x-layout-aplikasi judul="Pratinjau Templat" :subjudul="$info['nama'].' ('.$info['berkas'].') dengan data contoh'">
+<x-layout-aplikasi judul="Pratinjau Template" :subjudul="$info['nama'].' ('.$info['berkas'].') dengan data contoh'">
     <x-slot:aksi>
         <div class="flex items-center gap-3">
             @if ($bisaPdf)
@@ -29,7 +29,7 @@
     @unless ($bisaPdf)
         <p class="mb-5 flex items-center gap-2 rounded-xl bg-surf px-4 py-3 text-xs text-muted">
             <x-ikon nama="info" :ukuran="16" class="shrink-0 text-blue" />
-            LibreOffice tidak ditemukan di server ini, jadi PDF contoh belum bisa dibuat. Tampilan di bawah dibuat langsung dari templat dan bisa berbeda dari hasil PDF.
+            LibreOffice tidak ditemukan di server ini, jadi PDF contoh belum bisa dibuat. Tampilan di bawah dibuat langsung dari template dan bisa berbeda dari hasil PDF.
         </p>
     @endunless
 
@@ -61,17 +61,17 @@
                  style="aspect-ratio: 210 / 297">
                 @if ($bisaPdf)
                     {{-- PDF asli hasil LibreOffice: persis seperti surat yang akan dicetak. --}}
-                    <iframe title="Pratinjau PDF templat" src="{{ route('jenis-surat.pratinjau.pdf', [$token, 'sematan' => 1]) }}#toolbar=0&navpanes=0"
+                    <iframe title="Pratinjau PDF template" src="{{ route('jenis-surat.pratinjau.pdf', [$token, 'sematan' => 1]) }}#toolbar=0&navpanes=0"
                             class="size-full border-0"></iframe>
                 @elseif ($html !== null)
-                    {{-- Diisolasi dalam iframe tersandbox: isi berasal dari templat unggahan. --}}
+                    {{-- Diisolasi dalam iframe tersandbox: isi berasal dari template unggahan. --}}
                     <iframe id="isi-kertas" title="Pratinjau surat" sandbox="" srcdoc="{{ $html }}"
                             class="absolute left-0 top-0 border-0 bg-white"
                             style="width: 794px; height: 1123px; transform-origin: 0 0"></iframe>
                 @else
                     {{-- Cadangan terakhir: teks biasa, supaya halaman tetap terbuka walau berkasnya tak terbaca. --}}
                     <div class="size-full overflow-auto p-6">
-                        <p class="mb-3 text-[11px] text-muted">Tata letak tidak dapat ditampilkan; berikut isi teks templat.</p>
+                        <p class="mb-3 text-[11px] text-muted">Tata letak tidak dapat ditampilkan; berikut isi teks template.</p>
                         <pre class="whitespace-pre-wrap font-serif text-[12px] leading-relaxed">{{ $teks }}</pre>
                     </div>
                 @endif
